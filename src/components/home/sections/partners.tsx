@@ -128,7 +128,7 @@ export default function Partners() {
           className="max-w-4xl mx-auto text-center"
         >
           <Text className="text-lg lg:text-xl text-gray-500 dark:text-gray-400 font-light leading-relaxed italic">
-            "We're proud to collaborate with industry leaders and educational institutions to support startups and entrepreneurs worldwide."
+            &quot;We&apos;re proud to collaborate with industry leaders and educational institutions to support startups and entrepreneurs worldwide.&quot;
           </Text>
         </motion.div>
       </div>

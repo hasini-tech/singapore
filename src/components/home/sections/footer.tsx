@@ -146,7 +146,7 @@ export default function Footer() {
             </Link>
 
             <Text className="mb-8 max-w-sm font-light leading-relaxed">
-              Empowering founders, investors, and innovators to connect, launch, and grow. The "LinkedIn for startups" bridging innovation and opportunity worldwide.
+              Empowering founders, investors, and innovators to connect, launch, and grow. The &quot;LinkedIn for startups&quot; bridging innovation and opportunity worldwide.
             </Text>
 
             {/* Contact Info */}

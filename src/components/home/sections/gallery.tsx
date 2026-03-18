@@ -7,7 +7,7 @@ import {
 } from '@/data/gallery';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PiCaretLeft, PiCaretRight, PiImage, PiX } from 'react-icons/pi';
 import { Badge, Button, Text, Title } from 'rizzui';
@@ -30,13 +30,13 @@ export default function Gallery() {
 
   const modalImages = selectedEventTitle ? getImagesByEventTitle(selectedEventTitle) : [];
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentImageIndex((prev) => (prev === 0 ? modalImages.length - 1 : prev - 1));
-  };
+  }, [modalImages.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentImageIndex((prev) => (prev === modalImages.length - 1 ? 0 : prev + 1));
-  };
+  }, [modalImages.length]);
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -47,7 +47,7 @@ export default function Gallery() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalOpen, modalImages.length]);
+  }, [isModalOpen, modalImages.length, goToNext, goToPrevious]);
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? 'hidden' : 'unset';

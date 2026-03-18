@@ -93,7 +93,7 @@ export default function Testimonials() {
             <SwiperSlide key={i} className="!w-[450px] !h-auto py-10 flex">
               <div className="group relative flex flex-col h-full rounded-[40px] bg-white p-10 shadow-lg dark:bg-gray-100 dark:border-gray-200 transition-all duration-300 hover:shadow-2xl">
                 <PiQuotes className="h-12 w-12 text-teal-600/20 mb-6" />
-                <Text className="mb-8 text-lg font-light italic leading-relaxed text-gray-700 dark:text-gray-800">"{item.quote}"</Text>
+                <Text className="mb-8 text-lg font-light italic leading-relaxed text-gray-700 dark:text-gray-800">&quot;{item.quote}&quot;</Text>
                 <div className="mt-auto flex items-center gap-4 pt-6 border-t border-gray-50 dark:border-gray-200">
                   <div className="h-12 w-12 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold flex-shrink-0">{item.initials}</div>
                   <div>

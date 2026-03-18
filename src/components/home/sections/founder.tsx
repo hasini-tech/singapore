@@ -59,7 +59,7 @@ export default function Founder() {
             </Text>
 
             <Text className="text-xl lg:text-2xl text-gray-600 dark:text-gray-400 font-light leading-relaxed italic">
-              "I founded GrowthLab with a simple vision: to bridge the gap between innovation and opportunity. Every entrepreneur deserves access to the right network, resources, and support to turn their ideas into reality."
+              &quot;I founded GrowthLab with a simple vision: to bridge the gap between innovation and opportunity. Every entrepreneur deserves access to the right network, resources, and support to turn their ideas into reality.&quot;
             </Text>
 
             <div className="pt-8">

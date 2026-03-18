@@ -59,7 +59,7 @@ export default function Events() {
               Upcoming Events
             </Title>
             <Text className="text-xl lg:text-2xl font-light leading-relaxed">
-              Don't miss out on the most influential startup gatherings, workshops, and pitch nights in the ecosystem.
+              Don&apos;t miss out on the most influential startup gatherings, workshops, and pitch nights in the ecosystem.
             </Text>
           </motion.div>
         </div>
