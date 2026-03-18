@@ -1,0 +1,194 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { 
+  PiDotsThreeOutlineVerticalBold, 
+  PiHeartFill, 
+  PiHeartBold, 
+  PiChatCircleDotsBold, 
+  PiShareFatBold, 
+  PiGlobeSimpleBold, 
+  PiUsersBold, 
+  PiLockBold,
+  PiArrowSquareOutBold
+} from 'react-icons/pi';
+import { Title, Text, Button, Avatar, Collapse, ActionIcon, Badge } from 'rizzui';
+import cn from '@/utils/class-names';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
+
+import { PostResponse as Post } from '@/types/feed';
+
+interface PostCardProps {
+  post: Post;
+  className?: string;
+}
+
+export default function PostCard({ post, className }: PostCardProps) {
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [likesCount, setLikesCount] = useState(post.likesCount);
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  };
+
+  const name = `${post.author.firstName} ${post.author.lastName}`;
+  const visibilityIcon = {
+    public: <PiGlobeSimpleBold className="h-3 w-3" />,
+    connections: <PiUsersBold className="h-3 w-3" />,
+    private: <PiLockBold className="h-3 w-3" />,
+  }[post.postVisibility];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        "rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-100 dark:text-gray-900 shadow-sm overflow-hidden",
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between p-4 pb-3">
+        <div className="flex gap-3">
+          <Link href={`/profile/${post.author.id}`} className="flex-shrink-0">
+             <Avatar 
+                name={name}
+                src={post.author.avatarURL || "/growthlab/founder.jpg"}
+                size="md"
+                className="ring-2 ring-primary/10 ring-offset-2 ring-offset-white dark:ring-offset-gray-900"
+             />
+          </Link>
+          <div className="flex flex-col min-w-0">
+             <div className="flex items-center gap-1.5 flex-wrap">
+                <Link href={`/profile/${post.author.id}`} className="hover:text-primary transition-colors">
+                  <Title as="h4" className="text-sm font-bold truncate line-clamp-1">{name}</Title>
+                </Link>
+                {post.author.isVerified && (
+                  <Badge variant="flat" size="sm" className="bg-primary/10 text-primary px-1.5 h-4 text-[10px] font-bold">
+                    VERIFIED
+                  </Badge>
+                )}
+             </div>
+             <Text className="text-[11px] text-gray-400 line-clamp-1 truncate leading-tight mt-0.5">
+               {post.author.headline || "Ecosystem Partner @ GrowthLab"}
+             </Text>
+             <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-400 font-medium">
+               <span>{dayjs(post.createdAt).fromNow()}</span>
+               <span>•</span>
+               <span className="flex items-center gap-1">
+                 {visibilityIcon}
+                 <span className="capitalize">{post.postVisibility}</span>
+               </span>
+             </div>
+          </div>
+        </div>
+        <ActionIcon variant="text" className="text-gray-400 hover:text-gray-600">
+           <PiDotsThreeOutlineVerticalBold className="h-5 w-5" />
+        </ActionIcon>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pb-3 text-sm leading-relaxed text-gray-700 dark:text-gray-800">
+         <Collapse
+            header={() => null} 
+            className="group"
+         >
+            <p className="whitespace-pre-wrap">{post.postContent}</p>
+         </Collapse>
+      </div>
+
+      {/* Attachments - Media Gallery */}
+      {post.attachments.length > 0 && (
+        <div className={cn(
+          "grid gap-1 px-4 mb-3",
+          post.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"
+        )}>
+          {post.attachments.slice(0, 4).map((att, idx) => (
+            <div 
+              key={att.id} 
+              className={cn(
+                "relative bg-gray-50 rounded-xl overflow-hidden group cursor-pointer aspect-video",
+                post.attachments.length === 1 ? "h-[320px]" : "h-[180px]",
+                post.attachments.length === 3 && idx === 0 ? "col-span-2" : ""
+              )}
+            >
+              {att.postAttachmentType === 'image' ? (
+                <Image 
+                  src={att.postAttachmentUrl} 
+                  alt={att.postAttachmentTitle || "Post attachment"}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : att.postAttachmentType === 'video' ? (
+                <div className="flex h-full w-full items-center justify-center bg-black">
+                   <video src={att.postAttachmentUrl} className="h-full w-full object-contain" controls />
+                </div>
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+                   <PiArrowSquareOutBold className="h-8 w-8 text-gray-400" />
+                   <Text className="text-xs font-medium text-gray-500 truncate w-full">{att.postAttachmentTitle || att.postAttachmentUrl}</Text>
+                </div>
+              )}
+              {idx === 3 && post.attachments.length > 4 && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-lg font-bold">
+                  +{post.attachments.length - 4}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer Stats */}
+      <div className="px-4 py-2 flex items-center justify-between text-[11px] text-gray-400 border-t border-gray-50 dark:border-gray-200">
+         <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+            <div className="flex -space-x-1">
+               <PiHeartFill className="h-3 w-3 text-red-500 ring-2 ring-white dark:ring-gray-900 rounded-full" />
+            </div>
+            <span>{likesCount} likes</span>
+         </div>
+         <div className="flex items-center gap-3">
+            <span className="hover:underline cursor-pointer">{post.commentsCount} comments</span>
+            <span>•</span>
+            <span className="hover:underline cursor-pointer">{post.sharesCount} shares</span>
+         </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className="px-2 pb-2 flex gap-1">
+         <Button 
+            variant="text" 
+            className={cn(
+              "flex-1 gap-2 text-xs font-bold h-10 rounded-xl",
+              isLiked ? "text-primary" : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-200"
+            )}
+            onClick={handleLike}
+         >
+            {isLiked ? <PiHeartFill className="h-5 w-5" /> : <PiHeartBold className="h-5 w-5" />}
+            Like
+         </Button>
+         <Button 
+            variant="text" 
+            className="flex-1 gap-2 text-xs font-bold h-10 rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-200"
+         >
+            <PiChatCircleDotsBold className="h-5 w-5" />
+            Comment
+         </Button>
+         <Button 
+            variant="text" 
+            className="flex-1 gap-2 text-xs font-bold h-10 rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-200"
+         >
+            <PiShareFatBold className="h-5 w-5" />
+            Share
+         </Button>
+      </div>
+    </motion.div>
+  );
+}

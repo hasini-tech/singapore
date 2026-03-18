@@ -1,0 +1,112 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { PiHash, PiUserPlus, PiArrowRight } from 'react-icons/pi';
+import { Title, Text, Avatar, Badge, Button, Loader } from 'rizzui';
+import { feedService } from '@/services/feed.service';
+import { TrendingTopic, UserRecommendation } from '@/types/feed';
+
+export default function SidebarRight() {
+  const [trending, setTrending] = useState<TrendingTopic[]>([]);
+  const [recommendations, setRecommendations] = useState<UserRecommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [trendingData, recsData] = await Promise.all([
+          feedService.getTrendingTopics(),
+          feedService.getConnectionRecommendations()
+        ]);
+        setTrending(trendingData);
+        setRecommendations(recsData);
+      } catch (error) {
+        console.error('Failed to fetch sidebar right data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Trending Topics */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-gray-800 dark:bg-gray-100 dark:text-gray-900 shadow-sm"
+      >
+        <Title as="h3" className="mb-4 text-base font-bold flex items-center gap-2">
+          <PiHash className="h-5 w-5 text-primary" />
+          Trending Topics
+        </Title>
+        <div className="space-y-4">
+          {loading ? (
+             <div className="flex justify-center p-4"><Loader variant="threeDot" /></div>
+          ) : trending.map((topic) => (
+            <div key={topic.hashtag} className="group cursor-pointer">
+              <Text className="text-sm font-bold group-hover:text-primary transition-colors">#{topic.hashtag}</Text>
+              <Text className="text-xs text-gray-400">{topic.postsCount.toLocaleString()} posts</Text>
+            </div>
+          ))}
+        </div>
+        <Button variant="text" className="mt-4 h-auto p-0 text-sm font-bold text-gray-500 hover:text-primary">
+          View all topics
+        </Button>
+      </motion.div>
+
+      {/* Connection Recommendations */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-gray-800 dark:bg-gray-100 dark:text-gray-900 shadow-sm"
+      >
+        <Title as="h3" className="mb-4 text-base font-bold flex items-center gap-2">
+          <PiUserPlus className="h-5 w-5 text-secondary" />
+          People you may know
+        </Title>
+        <div className="space-y-4">
+          {loading ? (
+             <div className="flex justify-center p-4"><Loader variant="threeDot" /></div>
+          ) : recommendations.map((person) => (
+            <div key={person.id} className="flex items-center gap-3">
+              <Avatar
+                name={`${person.firstName} ${person.lastName}`}
+                src={person.avatarURL || "/growthlab/founder.jpg"}
+                size="md"
+                className="bg-primary/10"
+              />
+              <div className="flex-1 min-w-0">
+                <Text className="text-sm font-bold truncate">{person.firstName} {person.lastName}</Text>
+                <Text className="text-xs text-gray-500 truncate">{person.headline}</Text>
+              </div>
+              <Button size="sm" variant="outline" className="h-8 rounded-lg px-3 hover:bg-primary/10 hover:border-primary">
+                Connect
+              </Button>
+            </div>
+          ))}
+        </div>
+        <Button variant="text" className="mt-4 h-auto p-0 text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-2">
+          Show More <PiArrowRight />
+        </Button>
+      </motion.div>
+
+      {/* Sticky Footer Links */}
+      <div className="px-4 text-[11px] text-gray-400 flex flex-wrap gap-x-4 gap-y-2 justify-center">
+        <Link href="/about" className="hover:underline">About</Link>
+        <Link href="/accessibility" className="hover:underline">Accessibility</Link>
+        <Link href="/help" className="hover:underline">Help Center</Link>
+        <Link href="/privacy" className="hover:underline">Privacy & Terms</Link>
+        <Link href="/ad-choices" className="hover:underline">Ad Choices</Link>
+        <Link href="/advertising" className="hover:underline">Advertising</Link>
+        <div className="w-full text-center mt-2 flex items-center justify-center gap-1">
+           <span className="font-bold text-primary">GrowthLab</span> © 2026
+        </div>
+      </div>
+    </div>
+  );
+}
