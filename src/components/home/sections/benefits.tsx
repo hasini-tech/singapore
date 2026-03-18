@@ -1,0 +1,192 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import {
+  PiBriefcase,
+  PiCheckCircleFill,
+  PiCurrencyDollar,
+  PiGlobe,
+  PiGraduationCap,
+  PiNetwork,
+  PiRocketLaunch
+} from 'react-icons/pi';
+import { Text, Title } from 'rizzui';
+
+const benefits = [
+  {
+    icon: PiNetwork,
+    title: "Professional Networking",
+    description: "Connect with founders, investors, students, and innovators worldwide. Build meaningful relationships through our LinkedIn-style platform with AI-powered matching.",
+    details: "Global network, AI matching, industry groups, virtual meetups",
+    color: "blue"
+  },
+  {
+    icon: PiGraduationCap,
+    title: "Education & Mentorship",
+    description: "Access exclusive talks, workshops, and mentorship programs from industry leaders. Learn best practices and gain insights to accelerate your growth.",
+    details: "Expert talks, workshops, 1:1 mentorship, knowledge base",
+    color: "secondary"
+  },
+  {
+    icon: PiCurrencyDollar,
+    title: "Funding Opportunities",
+    description: "Connect with angel investors, VCs, and grant programs. Our platform facilitates funding rounds and helps you find the right financial partners for your growth.",
+    details: "Investor network, grant programs, pitch events, funding tools",
+    color: "green"
+  },
+  {
+    icon: PiRocketLaunch,
+    title: "Startup Resources",
+    description: "Access comprehensive startup resources including business templates, legal guides, marketing tools, and more.",
+    details: "Resource library, templates, guides, tools",
+    color: "orange"
+  },
+  {
+    icon: PiGlobe,
+    title: "AI-Driven Tools",
+    description: "Leverage AI-powered tools for market analysis, business plan generation, investor matching, and personalized growth recommendations.",
+    details: "AI market analysis, business plan builder, investor matching",
+    color: "primary"
+  },
+  {
+    icon: PiBriefcase,
+    title: "Talent & Jobs",
+    description: "Find top talent for your startup or discover new opportunities within the GrowthLab ecosystem. Post jobs, find co-founders, and build your dream team.",
+    details: "Job board, co-founder matching, talent pool, hiring resources",
+    color: "indigo"
+  },
+];
+
+const businessInBox = [
+  { name: "Company Setup & Corp-Sec", desc: "Incorporation, corporate secretarial services, business registration." },
+  { name: "Compliance & Filings", desc: "ACRA/IRAS filings, annual returns, regulatory compliance." },
+  { name: "Accounting & Tax", desc: "Bookkeeping, tax planning, financial reporting." },
+  { name: "Banking & Payments", desc: "Business account setup, multi-currency accounts, payment solutions." },
+  { name: "HR & Legal Support", desc: "Staff augmentation, payroll, work pass applications, legal consultation." },
+  { name: "Intellectual Property", desc: "Trademark registration, patent filing, IP protection." },
+  { name: "Marketing & Growth", desc: "Digital marketing, brand strategy, content creation." },
+  { name: "Tech & Development", desc: "Software development, cloud infrastructure, cybersecurity." },
+  { name: "Virtual Office & Admin", desc: "Virtual address, administrative support, mail handling." },
+];
+
+export default function Benefits() {
+  return (
+    <section id="benefits" className="relative py-24 lg:py-32 xl:py-40 bg-gray-900 overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source src="/benefits-background.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900/90 to-primary/20" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px]">
+        {/* Header */}
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 mb-24">
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-2"
+          >
+            <span className="text-7xl font-bold text-gray-800 lg:text-9xl">09</span>
+            <div className="mt-2 h-1.5 w-20 md:w-40 bg-gradient-to-r from-primary to-secondary rounded-full" />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="lg:col-span-10"
+          >
+            <Title as="h2" className="mb-6 text-4xl font-bold lg:text-7xl tracking-tight text-background dark:text-background leading-none">
+              Your GrowthLab Advantage
+            </Title>
+            <Text className="text-xl lg:text-3xl font-light text-gray-400">
+              Empowering founders, investors, and innovators to launch and scale faster.
+            </Text>
+          </motion.div>
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
+          {benefits.map((benefit, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.8,
+                delay: i * 0.1,
+                ease: [0.21, 0.45, 0.32, 0.9]
+              }}
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="group relative rounded-[40px] border border-gray-800 bg-gray-900/50 p-10 shadow-2xl transition-all duration-300 hover:border-primary/50"
+            >
+              <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-primary transition-colors dark:bg-primary-lighter">
+                <benefit.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+              </div>
+              <Title as="h3" className="mb-4 text-2xl font-bold transition-colors group-hover:text-primary text-background dark:text-background">
+                {benefit.title}
+              </Title>
+              <Text className="mb-6 text-gray-400 font-light leading-relaxed">
+                {benefit.description}
+              </Text>
+              <div className="mt-auto flex flex-col gap-2 pt-6 border-t border-gray-800">
+                <span className="text-xs font-bold text-primary uppercase tracking-widest">Includes</span>
+                <Text className="text-sm text-gray-500 italic">
+                  {benefit.details}
+                </Text>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Business in a Box */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="rounded-[60px] bg-gradient-to-br from-gray-800 to-gray-900 p-12 lg:p-20 shadow-3xl border border-gray-700"
+        >
+          <div className="text-center mb-16">
+            <Title as="h3" className="text-4xl lg:text-6xl font-bold text-background dark:text-background mb-6">Business in a Box</Title>
+            <Text className="text-xl lg:text-2xl text-gray-400 font-light max-w-3xl mx-auto">
+              Everything you need from incorporation to tech infrastructure, all in one place.
+            </Text>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10">
+            {businessInBox.map((service, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0, 0, 0, 0.2)" }}
+                className="flex items-start gap-4 group shadow p-4 rounded-lg border"
+              >
+                <div className="flex-shrink-0 mt-1">
+                  <PiCheckCircleFill className="h-6 w-6 text-primary group-hover:scale-125 transition-transform" />
+                </div>
+                <div>
+                  <Title as="h4" className="text-xl font-bold text-background dark:text-background mb-2">{service.name}</Title>
+                  <Text className="text-sm text-gray-500 font-light leading-snug">{service.desc}</Text>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
