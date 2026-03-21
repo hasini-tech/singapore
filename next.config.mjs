@@ -48,6 +48,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'isomorphic-furyroad.vercel.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.growthlab.sg',
+      },
     ],
   },
   reactStrictMode: true,

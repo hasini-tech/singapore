@@ -7,6 +7,7 @@ import { PiHash, PiUserPlus, PiArrowRight } from 'react-icons/pi';
 import { Title, Text, Avatar, Badge, Button, Loader } from 'rizzui';
 import { feedService } from '@/services/feed.service';
 import { TrendingTopic, UserRecommendation } from '@/types/feed';
+import { getApiMediaUrl } from '@/utils/get-api-media-url';
 
 export default function SidebarRight() {
   const [trending, setTrending] = useState<TrendingTopic[]>([]);
@@ -76,7 +77,7 @@ export default function SidebarRight() {
             <div key={person.id} className="flex items-center gap-3">
               <Avatar
                 name={`${person.firstName} ${person.lastName}`}
-                src={person.avatarURL || "/growthlab/founder.jpg"}
+                src={getApiMediaUrl(person.avatarURL) || "/growthlab/founder.jpg"}
                 size="md"
                 className="bg-primary/10"
               />

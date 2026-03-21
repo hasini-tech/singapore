@@ -15,8 +15,11 @@ import {
 import { Title, Text, Button, Avatar, ActionIcon, Textarea } from 'rizzui';
 import cn from '@/utils/class-names';
 import { Modal } from '@/modal-views/modal';
+import { useAuth } from '@/context/auth-context';
+import { getApiMediaUrl } from '@/utils/get-api-media-url';
 
 export default function CreatePost() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState('');
   const [visibility, setVisibility] = useState('public');
@@ -39,8 +42,8 @@ export default function CreatePost() {
       <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-100 dark:text-gray-900 shadow-sm">
         <div className="flex gap-3 mb-4">
           <Avatar 
-            name="Arul Murugan"
-            src="/growthlab/founder.jpg"
+            name={user?.name || "User"}
+            src={getApiMediaUrl(user?.avatarURL) || "/growthlab/founder.jpg"}
             size="md"
             className="ring-2 ring-primary/10 ring-offset-2 ring-offset-white dark:ring-offset-gray-900"
           />
@@ -87,12 +90,12 @@ export default function CreatePost() {
 
           <div className="flex gap-3 mb-6">
             <Avatar 
-              name="Arul Murugan"
-              src="/growthlab/founder.jpg"
+              name={user?.name || "User"}
+              src={getApiMediaUrl(user?.avatarURL) || "/growthlab/founder.jpg"}
               size="md"
             />
             <div>
-              <Title as="h4" className="text-sm font-bold">Arul Murugan</Title>
+              <Title as="h4" className="text-sm font-bold">{user?.name || "User"}</Title>
               <Button 
                 variant="outline" 
                 size="sm" 

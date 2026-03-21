@@ -8,6 +8,7 @@ import { Title, Text, Button, Avatar } from 'rizzui';
 import { useAuth } from '@/context/auth-context';
 import { feedService } from '@/services/feed.service';
 import { UserStatsResponse } from '@/types/feed';
+import { getApiMediaUrl } from '@/utils/get-api-media-url';
 
 const navItems = [
   { label: 'My Items', icon: PiBookmarkSimple, href: '/feed/saved' },
@@ -53,7 +54,7 @@ export default function SidebarLeft() {
           <div className="absolute -top-8 left-4">
             <Avatar
               name={displayName}
-              src={user?.avatarURL || "/growthlab/founder.jpg"}
+              src={getApiMediaUrl(user?.avatarURL) || "/growthlab/founder.jpg"}
               size="lg"
               className="border-4 border-white dark:border-gray-900 shadow-lg"
             />

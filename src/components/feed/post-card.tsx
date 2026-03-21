@@ -23,6 +23,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
 import { PostResponse as Post } from '@/types/feed';
+import { getApiMediaUrl } from '@/utils/get-api-media-url';
 
 interface PostCardProps {
   post: Post;
@@ -60,7 +61,7 @@ export default function PostCard({ post, className }: PostCardProps) {
           <Link href={`/profile/${post.author.id}`} className="flex-shrink-0">
              <Avatar 
                 name={name}
-                src={post.author.avatarURL || "/growthlab/founder.jpg"}
+                src={getApiMediaUrl(post.author.avatarURL) || "/growthlab/founder.jpg"}
                 size="md"
                 className="ring-2 ring-primary/10 ring-offset-2 ring-offset-white dark:ring-offset-gray-900"
              />
@@ -121,14 +122,14 @@ export default function PostCard({ post, className }: PostCardProps) {
             >
               {att.postAttachmentType === 'image' ? (
                 <Image 
-                  src={att.postAttachmentUrl} 
+                  src={getApiMediaUrl(att.postAttachmentUrl)} 
                   alt={att.postAttachmentTitle || "Post attachment"}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               ) : att.postAttachmentType === 'video' ? (
                 <div className="flex h-full w-full items-center justify-center bg-black">
-                   <video src={att.postAttachmentUrl} className="h-full w-full object-contain" controls />
+                   <video src={getApiMediaUrl(att.postAttachmentUrl)} className="h-full w-full object-contain" controls />
                 </div>
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
