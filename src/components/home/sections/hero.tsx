@@ -7,7 +7,7 @@ import { Badge, Button, Text, Title } from 'rizzui';
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative flex items-center justify-center pt-4 overflow-x-hidden">
+    <section id="hero" className="relative flex items-center justify-center pt-4 overflow-hidden">
       {/* Background Elements */}
       <div
         className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.05]"

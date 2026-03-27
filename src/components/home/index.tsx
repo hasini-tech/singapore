@@ -21,7 +21,7 @@ import Testimonials from './sections/testimonials';
 export default function LandingPage() {
   return (
     <div className="min-h-screen w-full bg-white dark:bg-transparent font-inter">
-      <FloatingNav />
+      {/* <FloatingNav /> */}
       <Hero />
       <About />
       <Features />
