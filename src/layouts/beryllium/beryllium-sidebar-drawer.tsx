@@ -6,9 +6,16 @@ import Logo from '@/components/logo';
 import cn from '@/utils/class-names';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
 
 export default function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  
+  const filteredMenuItems = isAuthenticated
+    ? berylliumSidebarMenuItems
+    : berylliumSidebarMenuItems.filter(item => ['Home', 'About Growthlab', 'What Happens', 'FAQ'].includes(item.name));
+
   return (
     <aside
       className={cn(
@@ -22,14 +29,25 @@ export default function Sidebar({ className }: { className?: string }) {
           aria-label="Site Logo"
           className="text-gray-800 hover:text-gray-900"
         >
-          <Logo className="max-w-[155px]" forceDark />
+          <Logo className="max-w-[180px]" forceDark />
         </Link>
       </div>
 
       <div className="custom-scrollbar h-[calc(100%-80px)] overflow-y-auto scroll-smooth">
         <div className="mt-4 pb-3 3xl:mt-6">
-          {berylliumSidebarMenuItems.map((item, index) => {
+          {filteredMenuItems.map((item, index) => {
             const isActive = pathname === (item?.href as string);
+
+            if (!item?.href) {
+              return (
+                <div
+                  key={item.name + '-' + index}
+                  className="mx-3 mb-2 mt-4 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500/70 2xl:mx-5 2xl:mt-7"
+                >
+                  {item.name}
+                </div>
+              );
+            }
 
             return (
               <Link

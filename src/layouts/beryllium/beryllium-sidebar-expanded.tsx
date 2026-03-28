@@ -12,6 +12,7 @@ import { useAtomValue } from 'jotai';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';
+import { useAuth } from '@/context/auth-context';
 import { PiCaretDownBold } from 'react-icons/pi';
 import { Collapse } from 'rizzui';
 
@@ -33,9 +34,11 @@ function LinkMenuItem({ item }: { item: ItemType }) {
       )}
     >
       <div className="flex items-center gap-2 truncate">
-        <span>
-          <Icon className="h-5 w-5" />
-        </span>
+        {Icon && (
+          <span>
+            <Icon className="h-5 w-5" />
+          </span>
+        )}
         <span className="truncate">{item.name}</span>
       </div>
       {item?.badge?.length ? <StatusBadge status={item?.badge} /> : null}
@@ -75,7 +78,7 @@ function CollapsibleMenuItem({ item }: { item: ItemType }) {
           )}
         >
           <span className={'flex items-center gap-3'}>
-            <Icon className="h-5 w-5" />
+            {Icon && <Icon className="h-5 w-5" />}
             {item.name}
           </span>
 
@@ -129,6 +132,11 @@ function CollapsibleMenuItem({ item }: { item: ItemType }) {
 export default function BerylliumLeftSidebarExpandable() {
   const { expandedLeft } = useBerylliumSidebars();
   const selectedMenu = useAtomValue(berylliumMenuItemAtom);
+  const { isAuthenticated } = useAuth();
+
+  const filteredMenuItems = isAuthenticated
+    ? selectedMenu.menuItems
+    : selectedMenu.menuItems.filter(item => ['Home', 'About Growthlab', 'What Happens', 'FAQ'].includes(item.name));
 
   return (
     <div
@@ -142,12 +150,16 @@ export default function BerylliumLeftSidebarExpandable() {
           {selectedMenu.title}
         </p>
         <div className="flex flex-col gap-2">
-          {selectedMenu.menuItems.map((menu) => (
+          {filteredMenuItems.map((menu) => (
             <Fragment key={menu.name}>
               {menu.href ? (
                 <LinkMenuItem item={menu} />
-              ) : (
+              ) : menu.subMenuItems ? (
                 <CollapsibleMenuItem item={menu} />
+              ) : (
+                <div className="mx-3 mt-4 mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500/70 2xl:mx-5 2xl:mt-7">
+                  {menu.name}
+                </div>
               )}
             </Fragment>
           ))}

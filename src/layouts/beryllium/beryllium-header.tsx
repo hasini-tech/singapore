@@ -20,13 +20,13 @@ export default function Header({ className }: { className?: string }) {
         <Link
           aria-label="Site Logo"
           href={'/'}
-          className="me-4 hidden w-[155px] shrink-0 text-gray-800 hover:text-gray-900 lg:me-5 xl:block"
+          className="me-4 hidden w-[180px] shrink-0 text-gray-800 hover:text-gray-900 lg:me-5 xl:block"
         >
-          <Logo className="max-w-[155px]" />
+          <Logo className="max-w-[180px]" />
         </Link>
       </div>
 
-      <div className="flex w-full items-center justify-between gap-5 xl:w-[calc(100%_-_190px)] 2xl:w-[calc(100%_-_310px)] 3xl:gap-6">
+      <div className="flex w-full items-center justify-between gap-5 xl:w-[calc(100%_-_220px)] 2xl:w-[calc(100%_-_340px)] 3xl:gap-6">
         <div className="flex max-w-2xl items-center xl:w-auto">
           <HamburgerButton
             view={<Sidebar className="static w-full 2xl:w-full" />}

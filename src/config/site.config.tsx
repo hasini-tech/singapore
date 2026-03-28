@@ -15,7 +15,7 @@ export const siteConfig = {
   logo: logoImg,
   icon: logoIconImg,
   mode: MODE.DARK,
-  layout: LAYOUT_OPTIONS.HELIUM,
+  layout: LAYOUT_OPTIONS.BERYLLIUM,
   // TODO: favicon
 };
 

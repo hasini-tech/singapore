@@ -86,6 +86,8 @@ const config: Config = {
       backgroundImage: {
         skeleton: `linear-gradient(90deg,transparent,#ecebeb,transparent)`,
         'skeleton-dark': `linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)`,
+        'gradient-primary': `linear-gradient(135deg, #0F7377 0%, #1E293B 100%)`,
+        'gradient-elegant': `linear-gradient(135deg, #0F7377 0%, #1E293B 50%, #0F7377 100%)`,
       },
       keyframes: {
         gradient: {

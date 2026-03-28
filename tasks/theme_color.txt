@@ -1,0 +1,124 @@
+GrowthLab branding and color palette
+Primary brand colors
+1. GrowthLab Teal (primary)
+* Hex: #0F7377
+* HSL: 187 78% 26%
+* Usage: Primary brand color, buttons, accents, gradients
+* Variations:
+* Darker: #0A5A5E / #0d5d61 (hover states)
+* Lighter: #1A8A8F
+2. GrowthLab Slate (secondary)
+* Hex: #1E293B
+* HSL: 222 47% 11%
+* Usage: Text, headings, dark backgrounds
+* Variations:
+* Light: #334155
+* Lighter: #64748B (secondary text)
+3. GrowthLab Orange (accent)
+* Hex: #F5A623
+* HSL: 43 96% 56%
+* Usage: Secondary buttons, highlights, featured badges
+* Hover: #d8941f
+
+Supporting colors
+Status colors
+* Success Green: #10B981
+* Warning Amber: #F59E0B
+* Error Red: #EF4444
+* Info Blue: #3B82F6
+* Premium Purple: #8B5CF6
+Neutral colors
+* Background Primary: #FFFFFF
+* Background Secondary: #F8FAFC
+* Background Tertiary: #F1F5F9
+* Text Primary: #1E293B
+* Text Secondary: #64748B
+* Text Muted: #94A3B8
+* Border: #E2E8F0
+
+Brand gradients
+Primary gradient
+
+background: linear-gradient(135deg, #0F7377 0%, #1E293B 100%);
+
+* Teal to Slate
+* Used on hero sections, cards, buttons
+Elegant animated gradient
+
+background: linear-gradient(135deg, #0F7377 0%, #1E293B 50%, #0F7377 100%);
+
+* Animated gradient shift
+* Used for premium features
+Text gradient
+
+background: linear-gradient(135deg, #0F7377 0%, #1E293B 100%);
+-webkit-background-clip: text;
+
+* Gradient text effect
+* Used for headings and highlights
+
+Typography
+* Font family: Inter (Google Fonts)
+* Fallback: system-ui, sans-serif
+* Style: Clean, modern, professional
+
+Design system components
+Buttons
+Primary button:
+* Background: #0F7377
+* Hover: #0d5d61
+* Text: White
+* Style: Rounded, medium weight, smooth transitions
+Secondary button:
+* Background: #F5A623
+* Hover: #d8941f
+* Text: White
+* Style: Same as primary
+Cards
+* Background: White (#FFFFFF)
+* Border: #E2E8F0
+* Shadow: Subtle with hover elevation
+* Border radius: 0.75rem to 1.5rem
+Badges
+* Space Category: #0F7377 (Teal)
+* Instant Booking: #10B981 (Green)
+* Featured: #F59E0B (Orange/Amber)
+
+Dark mode colors
+* Background Primary: #0F172A
+* Background Secondary: #1E293B
+* Background Tertiary: #334155
+* Text Primary: #F1F5F9
+* Text Secondary: #94A3B8
+* Border: #334155
+
+Brand identity summary
+Color psychology
+* Teal (#0F7377): Trust, growth, innovation
+* Slate (#1E293B): Professional, stability, sophistication
+* Orange (#F5A623): Energy, creativity, action
+Design principles
+* Minimalist and clean
+* Professional and modern
+* Accessible contrast ratios
+* Smooth animations and transitions
+* Consistent spacing and typography
+Visual style
+* Gradient backgrounds (Teal → Slate)
+* Glass effects with backdrop blur
+* Elegant shadows with teal tint
+* Hover effects with scale and color transitions
+* Rounded corners (0.5rem to 2rem)
+
+Quick reference
+Element	Color	Hex Code
+Primary Brand	GrowthLab Teal	#0F7377
+Secondary Brand	GrowthLab Slate	#1E293B
+Accent	GrowthLab Orange	#F5A623
+Success	Green	#10B981
+Warning	Amber	#F59E0B
+Error	Red	#EF4444
+Info	Blue	#3B82F6
+
+
+The GrowthLab brand uses a Teal + Slate + Orange palette for a professional, modern, and energetic look.

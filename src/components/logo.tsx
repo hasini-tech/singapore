@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import cn from '@/utils/class-names';
 
 interface LogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   iconOnly?: boolean;
@@ -43,7 +44,16 @@ export default function Logo({
   //     ? '/logo/desktop-dark.png'
   //     : '/logo/desktop-logo.png';
 
-  return <p className="text-4xl font-bold bg-gradient-to-r from-[#0F7377] to-[#1E293B] bg-clip-text text-transparent transition-opacity duration-200">GrowthLab</p>
+  return (
+    <p
+      className={cn(
+        'text-3xl font-bold bg-gradient-to-r from-[#0F7377] to-[#1E293B] bg-clip-text text-transparent transition-opacity duration-200 whitespace-nowrap overflow-visible leading-normal',
+        className
+      )}
+    >
+      GrowthLab
+    </p>
+  );
   // return (
   //   <img
   //     src={logoSrc}

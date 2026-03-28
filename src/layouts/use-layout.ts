@@ -7,7 +7,7 @@ import { atom, useAtom } from 'jotai';
 const isomorphicLayoutAtom = atom(
   typeof window !== 'undefined'
     ? localStorage.getItem('isomorphic-layout')
-    : LAYOUT_OPTIONS.HELIUM
+    : LAYOUT_OPTIONS.BERYLLIUM
 );
 
 const isomorphicLayoutAtomWithPersistence = atom(
@@ -22,7 +22,7 @@ const isomorphicLayoutAtomWithPersistence = atom(
 export function useLayout() {
   const [layout, setLayout] = useAtom(isomorphicLayoutAtomWithPersistence);
   return {
-    layout: layout === null ? LAYOUT_OPTIONS.HELIUM : layout,
+    layout: layout === null ? LAYOUT_OPTIONS.BERYLLIUM : layout,
     setLayout,
   };
 }

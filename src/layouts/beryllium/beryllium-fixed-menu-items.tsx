@@ -1,7 +1,7 @@
 import { routes } from '@/config/routes';
 import { atom } from 'jotai';
 import { IconType } from 'react-icons/lib';
-import { PiKey, PiBookOpenText } from 'react-icons/pi';
+import { PiHouse, PiInfo, PiLayout, PiBriefcase, PiUsers } from 'react-icons/pi';
 
 export interface SubMenuItemType {
   name: string;
@@ -12,7 +12,7 @@ export interface SubMenuItemType {
 
 export interface ItemType {
   name: string;
-  icon: IconType;
+  icon?: IconType;
   href?: string;
   description?: string;
   badge?: string;
@@ -31,19 +31,42 @@ export const berylliumMenuItems: MenuItemsType[] = [
   {
     id: '1',
     name: 'Home',
-    title: 'API Dashboard',
-    icon: PiKey,
+    title: 'Main Menu',
+    icon: PiHouse,
     menuItems: [
       {
-        name: 'API Keys',
+        name: 'Home',
         href: '/',
-        icon: PiKey,
+        icon: PiHouse,
       },
       {
-        name: 'API Docs',
-        href: '/',
-        icon: PiBookOpenText,
+        name: 'Feed',
+        href: routes.feed,
+        icon: PiLayout,
       },
+      {
+        name: 'My Business',
+        href: routes.business,
+        icon: PiBriefcase,
+      },
+      {
+        name: 'Connections',
+        href: routes.connect,
+        icon: PiUsers,
+      },
+      {
+        name: 'About Growthlab'
+      },
+      {
+        name: 'What Happens',
+        href: routes.about.whatHappens,
+        icon: PiInfo,
+      },
+      {
+        name: 'FAQ',
+        href: routes.about.faq,
+        icon: PiInfo,
+      }
     ],
   },
 ];
