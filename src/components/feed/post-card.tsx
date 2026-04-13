@@ -37,6 +37,7 @@ import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
 import MediaLightbox, { MediaItem } from './media-lightbox';
 import PostDetailModal from './post-detail-modal';
+import ElegantTable from '@/app/shared/tables/basic/elegant';
 
 interface PostCardProps {
   post: Post;
