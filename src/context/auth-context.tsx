@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (!res.ok) return;
-        const profile = await res.json();
+        const profile = (await res.json()) as Record<string, any>;
         setUser((prev) => ({
           ...prev,
           id: String(profile.id),
