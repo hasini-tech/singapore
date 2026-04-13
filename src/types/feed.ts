@@ -104,3 +104,122 @@ export interface TrendingTopic {
   repostsCount: number;
   engagementScore: number;
 }
+
+// ── Comment Types ────────────────────────────
+
+export interface CommentResponse {
+  id: number;
+  postID: number;
+  commentAuthorID: number;
+  author: UserProfile;
+  authorPageID: number | null;
+  commentContent: string;
+  commentLikeCount: number;
+  parentCommentID: number | null;
+  createdAt: string;
+  updatedAt: string;
+  isLiked: boolean;
+  replies: CommentResponse[];
+}
+
+export interface CommentsListResponse {
+  comments: CommentResponse[];
+  total: number;
+  totalAll: number;
+  page: number;
+  limit: number;
+  hasNext: boolean;
+}
+
+// ── Notification Types ───────────────────────
+
+export interface NotificationItem {
+  id: number;
+  type: string;
+  feature: 'feed' | 'connections' | 'pages' | 'profile' | 'system';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  title: string;
+  message: string;
+  actorID: number | null;
+  actorName: string | null;
+  actorAvatar: string | null;
+  targetType: string | null;
+  targetID: number | null;
+  actionUrl: string | null;
+  isRead: boolean;
+  groupCount: number;
+  extra_data: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  notifications: NotificationItem[];
+  total: number;
+  unreadCount: number;
+  skip: number;
+  limit: number;
+}
+
+export interface UnreadCountByFeature {
+  feed: number;
+  connections: number;
+  pages: number;
+  profile: number;
+  system: number;
+  total: number;
+}
+
+// ── Upload Types ─────────────────────────────
+
+export interface UploadResponse {
+  filename: string;
+  original_filename: string;
+  url: string;
+  size: number;
+  type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+  attachment_data: {
+    postAttachmentType: string;
+    postAttachmentUrl: string;
+    postAttachmentTitle: string;
+    postAttachmentDescription: string | null;
+  };
+}
+
+// ── Saved Posts Types ────────────────────────
+
+export interface SavedPostsResponse {
+  posts: PostResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  hasNext: boolean;
+}
+
+// ── Repost Types ─────────────────────────────
+
+export interface RepostRequest {
+  caption?: string;
+  pageID?: number;
+  visibility?: 'public' | 'connections' | 'private';
+}
+
+// ── Create Post Types ────────────────────────
+
+export interface CreatePostRequest {
+  postContent: string;
+  postVisibility: 'public' | 'connections' | 'private';
+  postHashTags?: string[];
+  authorPageID?: number | null;
+  attachments?: Array<{
+    postAttachmentType: 'image' | 'video' | 'document';
+    postAttachmentUrl: string;
+    postAttachmentTitle: string;
+    postAttachmentDescription?: string;
+  }>;
+}
+
+export interface CreateCommentRequest {
+  commentContent: string;
+  parentCommentID?: number;
+  authorPageID?: number;
+}
