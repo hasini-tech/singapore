@@ -47,7 +47,10 @@ export default function Logo({
   return (
     <p
       className={cn(
-        'text-3xl font-bold bg-gradient-to-r from-[#0F7377] to-[#1E293B] bg-clip-text text-transparent transition-opacity duration-200 whitespace-nowrap overflow-visible leading-normal',
+        'text-3xl font-bold bg-clip-text text-transparent transition-opacity duration-200 whitespace-nowrap overflow-visible leading-normal',
+        forceDark
+          ? 'bg-gradient-to-r from-white to-white/80'
+          : 'bg-gradient-to-r from-[#0F7377] to-[#1E293B]',
         className
       )}
     >
