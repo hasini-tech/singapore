@@ -1,7 +1,7 @@
 import { routes } from '@/config/routes';
 import { atom } from 'jotai';
 import { IconType } from 'react-icons/lib';
-import { PiHouse, PiInfo, PiLayout, PiBriefcase, PiUsers } from 'react-icons/pi';
+import { PiHouse, PiInfo, PiLayout, PiBriefcase, PiUsers, PiCalendarBlank } from 'react-icons/pi';
 
 export interface SubMenuItemType {
   name: string;
@@ -43,6 +43,11 @@ export const berylliumMenuItems: MenuItemsType[] = [
         name: 'Feed',
         href: routes.feed,
         icon: PiLayout,
+      },
+      {
+        name: 'Events',
+        href: routes.events,
+        icon: PiCalendarBlank,
       },
       {
         name: 'My Business',

@@ -4,6 +4,7 @@ export const routes = {
     faq: "/about/faq"
   },
   feed: '/feed',
+  events: '/events',
   business: '/business',
   connect: '/connect',
   // templates

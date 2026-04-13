@@ -1,5 +1,5 @@
 import { routes } from '@/config/routes';
-import { PiHouse, PiInfo, PiLayout, PiBriefcase, PiUsers } from 'react-icons/pi';
+import { PiHouse, PiInfo, PiLayout, PiBriefcase, PiUsers, PiCalendarBlank } from 'react-icons/pi';
 
 // Note: do not add href in the label object, it is rendering as label
 export const menuItems = [
@@ -12,6 +12,11 @@ export const menuItems = [
     name: 'Feed',
     href: routes.feed,
     icon: <PiLayout />,
+  },
+  {
+    name: 'Events',
+    href: routes.events,
+    icon: <PiCalendarBlank />,
   },
   {
     name: 'My Business',

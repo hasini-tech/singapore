@@ -23,7 +23,7 @@ export function HeliumSidebarMenu() {
           return (
             <div
               key={item.name + '-' + index}
-              className="mx-3 mb-2 mt-4 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500/70 2xl:mx-5 2xl:mt-7"
+              className="mx-3 mb-2 mt-4 px-3 text-[11px] font-semibold uppercase tracking-wider text-white/50 2xl:mx-5 2xl:mt-7"
             >
               {item.name}
             </div>
@@ -37,8 +37,8 @@ export function HeliumSidebarMenu() {
             className={cn(
               'group relative mx-3 my-0.5 flex items-center justify-between rounded-md px-3 py-2 font-medium capitalize lg:my-1 2xl:mx-5 2xl:my-2',
               isActive
-                ? 'before:top-2/5 text-white before:absolute before:-start-3 before:block before:h-4/5 before:w-1 before:rounded-ee-md before:rounded-se-md before:bg-white dark:text-gray-900 2xl:before:-start-5'
-                : 'text-gray-300/70 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-500 dark:hover:text-gray-700'
+                ? 'before:top-2/5 text-white before:absolute before:-start-3 before:block before:h-4/5 before:w-1 before:rounded-ee-md before:rounded-se-md before:bg-white 2xl:before:-start-5'
+                : 'text-white/70 transition-colors duration-200 hover:bg-white/10 hover:text-white'
             )}
           >
             <div className="flex items-center truncate">
@@ -47,8 +47,8 @@ export function HeliumSidebarMenu() {
                   className={cn(
                     'me-2 inline-flex h-5 w-5 items-center justify-center rounded-md transition-colors duration-200 [&>svg]:h-[20px] [&>svg]:w-[20px]',
                     isActive
-                      ? 'text-white dark:text-gray-900'
-                      : 'text-gray-300/70 group-hover:text-gray-500 dark:text-gray-500'
+                      ? 'text-white'
+                      : 'text-white/70 group-hover:text-white'
                   )}
                 >
                   {item?.icon}
