@@ -19,8 +19,11 @@ import {
   PiTrashBold,
   PiCopyBold,
   PiPlayFill,
+  PiPencilSimpleBold,
+  PiCheckBold,
+  PiXBold,
 } from 'react-icons/pi';
-import { Title, Text, Button, Avatar, ActionIcon, Badge, Popover } from 'rizzui';
+import { Title, Text, Button, Avatar, ActionIcon, Badge, Popover, Textarea } from 'rizzui';
 import cn from '@/utils/class-names';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -55,6 +58,10 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailMediaIndex, setDetailMediaIndex] = useState(-1);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [currentContent, setCurrentContent] = useState(post.postContent);
 
   // Video auto-pause on scroll (pause when >2x viewport away)
   const cardRef = useRef<HTMLDivElement>(null);
@@ -142,6 +149,40 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
       toast.error('Failed to copy link');
     }
     setMenuOpen(false);
+  };
+
+  const handleStartEdit = () => {
+    setEditContent(currentContent);
+    setIsEditing(true);
+    setMenuOpen(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent('');
+  };
+
+  const handleSaveEdit = async () => {
+    const trimmed = editContent.trim();
+    if (!trimmed || trimmed === currentContent) {
+      setIsEditing(false);
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const hashtags = trimmed.match(/#(\w+)/g)?.map((t) => t.slice(1)) || [];
+      await feedService.updatePost(post.id, {
+        postContent: trimmed,
+        postHashTags: hashtags,
+      });
+      setCurrentContent(trimmed);
+      setIsEditing(false);
+      toast.success('Post updated');
+    } catch {
+      toast.error('Failed to update post');
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const handleCommentCountChange = (delta: number) => {
@@ -244,6 +285,15 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
               </button>
               {isOwnPost && (
                 <button
+                  onClick={handleStartEdit}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                >
+                  <PiPencilSimpleBold className="h-4 w-4" />
+                  Edit post
+                </button>
+              )}
+              {isOwnPost && (
+                <button
                   onClick={handleDelete}
                   disabled={deleting}
                   className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-50"
@@ -256,18 +306,50 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
           </Popover>
         </div>
 
-        {/* Content - click to open detail */}
-        <div
-          className="cursor-pointer px-4 pb-3 text-sm leading-relaxed text-gray-700"
-          onClick={() => { setDetailMediaIndex(-1); setDetailOpen(true); }}
-        >
-          <p className="whitespace-pre-wrap line-clamp-6">{post.postContent}</p>
-          {post.postContent.length > 400 && (
-            <span className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">
-              ...see more
-            </span>
-          )}
-        </div>
+        {/* Content - click to open detail or show edit mode */}
+        {isEditing ? (
+          <div className="px-4 pb-3">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[120px]"
+              textareaClassName="border-muted focus:ring-primary/30 text-sm resize-none"
+            />
+            <div className="mt-2 flex items-center justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg text-xs"
+                onClick={handleCancelEdit}
+                disabled={editSaving}
+              >
+                <PiXBold className="h-3.5 w-3.5" />
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg text-xs"
+                onClick={handleSaveEdit}
+                isLoading={editSaving}
+              >
+                <PiCheckBold className="h-3.5 w-3.5" />
+                Save
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="cursor-pointer px-4 pb-3 text-sm leading-relaxed text-gray-700"
+            onClick={() => { setDetailMediaIndex(-1); setDetailOpen(true); }}
+          >
+            <p className="whitespace-pre-wrap line-clamp-6">{currentContent}</p>
+            {currentContent.length > 400 && (
+              <span className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">
+                ...see more
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Attachments - Media Gallery */}
         {post.attachments.length > 0 && (

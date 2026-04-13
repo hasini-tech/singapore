@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/auth-context';
 import cn from '@/utils/class-names';
+import { getApiMediaUrl } from '@/utils/get-api-media-url';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { PiCaretDownBold, PiCheckCircleFill, PiSignOut, PiUser } from 'react-icons/pi';
@@ -14,6 +15,16 @@ export default function ProfileMenu({
 }) {
   const { user, isAuthenticated } = useAuth();
 
+  const displayName = user?.name && user.name !== 'User'
+    ? user.name
+    : user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.email || 'User';
+
+  const avatarSrc = user?.avatarURL
+    ? getApiMediaUrl(user.avatarURL)
+    : user?.image || '/avatar.webp';
+
   return (
     <ProfileMenuPopover>
       <Popover.Trigger>
@@ -24,13 +35,13 @@ export default function ProfileMenu({
           )}
         >
           <Avatar
-            src="/avatar.webp"
-            name={user?.name || user?.email || 'User'}
+            src={avatarSrc}
+            name={displayName}
             className={cn('!h-9 !w-9 sm:!h-10 sm:!w-10', avatarClassName)}
           />
           <div className="hidden text-left sm:block">
             <h6 className="text-sm font-bold leading-none text-foreground lg:text-base">
-              {isAuthenticated ? (user?.name || 'Growthlab Team') : 'Guest'}
+              {isAuthenticated ? displayName : 'Guest'}
             </h6>
             <p className="mt-1 text-xs text-gray-400">
               {isAuthenticated ? 'Personal Account' : 'Sign in'}
@@ -68,8 +79,18 @@ function ProfileMenuPopover({ children }: React.PropsWithChildren<{}>) {
 }
 
 function DropdownMenu() {
-  const { logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+
+  const displayName = user?.name && user.name !== 'User'
+    ? user.name
+    : user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.email || 'User';
+
+  const avatarSrc = user?.avatarURL
+    ? getApiMediaUrl(user.avatarURL)
+    : user?.image || '/avatar.webp';
 
   return (
     <div className="w-80 rounded-xl bg-white text-left dark:bg-gray-50 border border-gray-100 dark:border-gray-200">
@@ -86,11 +107,11 @@ function DropdownMenu() {
         <div className="mt-2 border-y border-gray-100 bg-gray-50/50 px-5 py-4 dark:bg-gray-100 dark:border-gray-200 cursor-pointer">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar src="/avatar.webp" name="Growthlab Team" />
+              <Avatar src={avatarSrc} name={displayName} />
               <div>
                 <div className="flex items-center gap-1.5">
                   <h6 className="text-sm font-bold text-gray-900 dark:text-white">
-                    Growthlab Team
+                    {displayName}
                   </h6>
                   <PiUser className="h-3.5 w-3.5 text-gray-400" />
                 </div>

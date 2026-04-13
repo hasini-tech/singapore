@@ -71,6 +71,13 @@ export const feedService = {
     });
   },
 
+  updatePost: async (postId: number, data: { postContent?: string; postVisibility?: string; postHashTags?: string[] }) => {
+    return apiRequest<PostResponse>(`/feed/posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   // ── Like / Save / Share ────────────────────
 
   likePost: async (postId: number) => {

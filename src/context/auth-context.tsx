@@ -19,6 +19,15 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarURL?: string | null;
+  coverImageURL?: string | null;
+  headline?: string | null;
+  companyName?: string | null;
+  location?: string | null;
+  role?: string;
+  isVerified?: boolean;
   [key: string]: any;
 }
 
@@ -104,6 +113,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }, [session, status]);
+
+  // Fetch full profile from /auth/me to hydrate user with real data
+  // This handles existing sessions where JWT doesn't have profile fields
+  const profileFetchedRef = useRef(false);
+  useEffect(() => {
+    if (!accessToken || profileFetchedRef.current) return;
+    profileFetchedRef.current = true;
+
+    (async () => {
+      try {
+        const res = await fetch(`${API}/auth/me`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok) return;
+        const profile = await res.json();
+        setUser((prev) => ({
+          ...prev,
+          id: String(profile.id),
+          email: profile.emailAddress || prev?.email || '',
+          name: `${profile.firstName} ${profile.lastName}`,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          avatarURL: profile.avatarURL,
+          coverImageURL: profile.coverImageURL,
+          headline: profile.headline,
+          companyName: profile.companyName,
+          location: profile.location,
+          role: profile.role,
+          isVerified: profile.isVerified,
+        }));
+      } catch {
+        // Profile fetch failed, user object stays as-is from session
+      }
+    })();
+  }, [accessToken]);
 
   // refs so the api-client callbacks never capture stale values
   const accessTokenRef = useRef(accessToken);
