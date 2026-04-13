@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -18,9 +18,9 @@ import {
   PiBookmarkSimpleFill,
   PiTrashBold,
   PiCopyBold,
-  PiLinkBold,
+  PiPlayFill,
 } from 'react-icons/pi';
-import { Title, Text, Button, Avatar, Collapse, ActionIcon, Badge, Popover } from 'rizzui';
+import { Title, Text, Button, Avatar, ActionIcon, Badge, Popover } from 'rizzui';
 import cn from '@/utils/class-names';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -32,6 +32,8 @@ import { useAuth } from '@/context/auth-context';
 import { toast } from 'react-hot-toast';
 import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
+import MediaLightbox, { MediaItem } from './media-lightbox';
+import PostDetailModal from './post-detail-modal';
 
 interface PostCardProps {
   post: Post;
@@ -49,6 +51,45 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailMediaIndex, setDetailMediaIndex] = useState(-1);
+
+  // Video auto-pause on scroll (pause when >2x viewport away)
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+
+  const setVideoRef = useCallback((id: number, el: HTMLVideoElement | null) => {
+    if (el) videoRefs.current.set(id, el);
+    else videoRefs.current.delete(id);
+  }, []);
+
+  useEffect(() => {
+    if (post.attachments.every((a) => a.postAttachmentType !== 'video')) return;
+    const viewportHeight = window.innerHeight;
+    const threshold = viewportHeight * 2;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // entry.rootMargin is set to give us 2x viewport threshold
+          videoRefs.current.forEach((video) => {
+            if (!entry.isIntersecting && !video.paused) {
+              video.pause();
+            }
+          });
+        });
+      },
+      {
+        rootMargin: `${threshold}px 0px ${threshold}px 0px`,
+        threshold: 0,
+      }
+    );
+
+    if (cardRef.current) observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [post.attachments]);
 
   const isOwnPost = user?.id ? Number(user.id) === post.authorID : false;
 
@@ -118,6 +159,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
   return (
     <>
       <motion.div
+        ref={cardRef}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
@@ -214,11 +256,17 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
           </Popover>
         </div>
 
-        {/* Content */}
-        <div className="px-4 pb-3 text-sm leading-relaxed text-gray-700">
-          <Collapse header={() => null} className="group">
-            <p className="whitespace-pre-wrap">{post.postContent}</p>
-          </Collapse>
+        {/* Content - click to open detail */}
+        <div
+          className="cursor-pointer px-4 pb-3 text-sm leading-relaxed text-gray-700"
+          onClick={() => { setDetailMediaIndex(-1); setDetailOpen(true); }}
+        >
+          <p className="whitespace-pre-wrap line-clamp-6">{post.postContent}</p>
+          {post.postContent.length > 400 && (
+            <span className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">
+              ...see more
+            </span>
+          )}
         </div>
 
         {/* Attachments - Media Gallery */}
@@ -237,6 +285,11 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                   post.attachments.length === 1 ? 'h-[320px]' : 'h-[180px]',
                   post.attachments.length === 3 && idx === 0 ? 'col-span-2' : ''
                 )}
+                onClick={() => {
+                  if (att.postAttachmentType === 'video') return; // let video controls work
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
               >
                 {att.postAttachmentType === 'image' ? (
                   <Image
@@ -248,6 +301,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                 ) : att.postAttachmentType === 'video' ? (
                   <div className="flex h-full w-full items-center justify-center bg-black">
                     <video
+                      ref={(el) => setVideoRef(att.id, el)}
                       src={getApiMediaUrl(att.postAttachmentUrl)}
                       className="h-full w-full object-contain"
                       controls
@@ -360,6 +414,28 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
         isOpen={showShareDialog}
         onClose={() => setShowShareDialog(false)}
         post={post}
+      />
+
+      {/* Fullscreen Media Lightbox */}
+      <MediaLightbox
+        items={post.attachments.map((att) => ({
+          id: att.id,
+          type: att.postAttachmentType,
+          url: att.postAttachmentUrl,
+          title: att.postAttachmentTitle,
+        }))}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+
+      {/* Detailed Post View */}
+      <PostDetailModal
+        post={post}
+        isOpen={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        onDeleted={onDeleted}
+        initialMediaIndex={detailMediaIndex}
       />
     </>
   );
