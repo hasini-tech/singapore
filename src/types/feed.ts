@@ -80,7 +80,7 @@ export interface PostResponse {
   postHashTags: string[];
   attachments: Array<{
     id: number;
-    postAttachmentType: "image" | "video" | "document";
+    postAttachmentType: "image" | "video" | "document" | "link";
     postAttachmentUrl: string;
     postAttachmentTitle: string | null;
   }>;
@@ -176,9 +176,9 @@ export interface UploadResponse {
   original_filename: string;
   url: string;
   size: number;
-  type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+  type: 'image' | 'video' | 'document' | 'link';
   attachment_data: {
-    postAttachmentType: string;
+    postAttachmentType: 'image' | 'video' | 'document' | 'link';
     postAttachmentUrl: string;
     postAttachmentTitle: string;
     postAttachmentDescription: string | null;
@@ -211,7 +211,19 @@ export interface CreatePostRequest {
   postHashTags?: string[];
   authorPageID?: number | null;
   attachments?: Array<{
-    postAttachmentType: 'image' | 'video' | 'document';
+    postAttachmentType: 'image' | 'video' | 'document' | 'link';
+    postAttachmentUrl: string;
+    postAttachmentTitle: string;
+    postAttachmentDescription?: string;
+  }>;
+}
+
+export interface UpdatePostRequest {
+  postContent?: string;
+  postVisibility: 'public' | 'connections' | 'private'; // REQUIRED by backend
+  postHashTags?: string[];
+  attachments?: Array<{
+    postAttachmentType: 'image' | 'video' | 'document' | 'link';
     postAttachmentUrl: string;
     postAttachmentTitle: string;
     postAttachmentDescription?: string;

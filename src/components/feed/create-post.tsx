@@ -145,7 +145,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         .filter((a) => a.uploaded)
         .map((a) => a.uploaded!.attachment_data)
         .map((ad) => ({
-          postAttachmentType: ad.postAttachmentType as 'image' | 'video' | 'document',
+          postAttachmentType: ad.postAttachmentType as 'image' | 'video' | 'document' | 'link',
           postAttachmentUrl: ad.postAttachmentUrl,
           postAttachmentTitle: ad.postAttachmentTitle,
         }));

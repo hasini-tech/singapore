@@ -9,6 +9,7 @@ import {
   CreateCommentRequest,
   PostResponse,
   CreatePostRequest,
+  UpdatePostRequest,
   UploadResponse,
   SavedPostsResponse,
   RepostRequest,
@@ -71,7 +72,7 @@ export const feedService = {
     });
   },
 
-  updatePost: async (postId: number, data: { postContent?: string; postVisibility?: string; postHashTags?: string[] }) => {
+  updatePost: async (postId: number, data: UpdatePostRequest) => {
     return apiRequest<PostResponse>(`/feed/posts/${postId}`, {
       method: 'PUT',
       body: JSON.stringify(data),

@@ -16,7 +16,7 @@ import { getApiMediaUrl } from '@/utils/get-api-media-url';
 
 export interface MediaItem {
   id: number;
-  type: 'image' | 'video' | 'document';
+  type: 'image' | 'video' | 'document' | 'link';
   url: string;
   title?: string | null;
 }

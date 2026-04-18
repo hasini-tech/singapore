@@ -26,7 +26,7 @@ export default function FeedLayout() {
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Left Sidebar - Desktop Only */}
-          <aside className="hidden h-fit flex-col lg:sticky lg:top-[90px] lg:col-span-3 lg:flex">
+          <aside className="custom-scrollbar-none hidden h-[calc(100vh-110px)] flex-col overflow-y-auto lg:sticky lg:top-[90px] lg:col-span-3 lg:flex">
             <SidebarLeft />
           </aside>
 
@@ -92,7 +92,7 @@ export default function FeedLayout() {
           </main>
 
           {/* Right Sidebar - Desktop Only */}
-          <aside className="hidden h-fit flex-col lg:sticky lg:top-[90px] lg:col-span-3 lg:flex">
+          <aside className="custom-scrollbar-none hidden h-[calc(100vh-110px)] flex-col overflow-y-auto lg:sticky lg:top-[90px] lg:col-span-3 lg:flex">
             <SidebarRight />
           </aside>
         </div>

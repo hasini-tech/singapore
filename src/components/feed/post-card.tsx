@@ -175,6 +175,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
       await feedService.updatePost(post.id, {
         postContent: trimmed,
         postHashTags: hashtags,
+        postVisibility: post.postVisibility,
       });
       setCurrentContent(trimmed);
       setIsEditing(false);

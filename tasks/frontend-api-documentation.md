@@ -1,6 +1,6 @@
 # Frontend API Documentation Guide
 
-This guide provides documentation for the core GET APIs of the Growthlab Platform.
+This guide provides documentation for the core APIs (GET, POST, PUT, DELETE) of the Growthlab Platform.
 
 **Base URL:** `https://api.growthlab.sg/api/v1`
 
@@ -19,6 +19,14 @@ All requests (except where noted) require an `Authorization` header with a Beare
 6. [Get Notifications (`/notifications`)](#6-get-notifications-notifications)
 7. [Get Unread Count by Feature (`/notifications/unread-count-by-feature`)](#7-get-unread-count-by-feature-notificationsunread-count-by-feature)
 8. [Get My Pages (`/pages/my-pages`)](#8-get-my-pages-pagesmy-pages)
+9. [Create a Post (`/feed/posts`)](#9-create-a-post-feedposts)
+10. [Update a Post (`/feed/posts/{post_id}`)](#10-update-a-post-feedpostsid)
+11. [Delete a Post (`/feed/posts/{post_id}`)](#11-delete-a-post-feedpostsid)
+12. [Like/Unlike a Post (`/feed/posts/{post_id}/like`)](#12-likeunlike-a-post-feedpostsidlike)
+13. [Add a Comment (`/feed/posts/{post_id}/comments`)](#13-add-a-comment-feedpostsidcomments)
+14. [Get Comments for a Post (`/feed/posts/{post_id}/comments`)](#14-get-comments-for-a-post-feedpostsidcomments)
+15. [Share/Repost a Post (`/feed/posts/{post_id}/share`)](#15-sharerepost-a-post-feedpostsidshare)
+16. [Send Connection Request (`/connections/request`)](#16-send-connection-request-connectionsrequest)
 
 ---
 
@@ -290,4 +298,197 @@ interface BusinessPageListItem {
 }
 
 type MyPagesResponse = BusinessPageListItem[];
+```
+
+---
+
+## 9. Create a Post
+Creates a new post on the feed.
+
+**Endpoint:** `POST /feed/posts`
+
+### Request Body
+```typescript
+interface PostCreate {
+  postContent: string; // Length: 1-5000 characters
+  postVisibility: "public" | "connections" | "private"; // Default: "public"
+  postHashTags?: string[]; // Max 10 items
+  attachments?: Array<{
+    postAttachmentType: "IMAGE" | "VIDEO" | "DOCUMENT";
+    postAttachmentUrl: string; // Max length: 500
+    postAttachmentTitle?: string; // Max length: 200
+    postAttachmentDescription?: string; // Max length: 500
+  }>; // Max 10 items
+  authorPageID?: number; // Page ID if posting as a business page
+}
+```
+
+### Response Structure
+Returns a `PostResponse` object (See Section 4).
+
+---
+
+## 10. Update a Post
+Updates an existing post. Only the author of the post can update it.
+
+**Endpoint:** `PUT /feed/posts/{post_id}`
+
+### Request Body
+```typescript
+interface PostUpdate {
+  postContent?: string; // Length: 1-5000 characters
+  postVisibility?: "public" | "connections" | "private";
+  postHashTags?: string[]; // Max 10 items
+  attachments?: Array<{
+    postAttachmentType: "IMAGE" | "VIDEO" | "DOCUMENT";
+    postAttachmentUrl: string;
+    postAttachmentTitle?: string;
+    postAttachmentDescription?: string;
+  }>; // Max 10 items. Replaces existing attachments.
+}
+```
+
+### Response Structure
+Returns the updated `PostResponse` object (See Section 4).
+
+---
+
+## 11. Delete a Post
+Deletes a post. Only the author can delete their post.
+
+**Endpoint:** `DELETE /feed/posts/{post_id}`
+
+### Response Structure
+```typescript
+interface MessageResponse {
+  message: string;
+  success: boolean;
+}
+```
+
+---
+
+## 12. Like/Unlike a Post
+Toggles the like status of a post for the authenticated user (or page).
+
+**Endpoint:** `POST /feed/posts/{post_id}/like`
+
+### Request Body (Optional)
+```typescript
+interface LikeRequest {
+  pageID?: number; // Page ID if liking as a business page
+}
+```
+
+### Response Structure
+```typescript
+interface MessageResponse {
+  message: string;
+  success: boolean;
+}
+```
+
+---
+
+## 13. Add a Comment
+Adds a new comment or replies to an existing comment on a post.
+
+**Endpoint:** `POST /feed/posts/{post_id}/comments`
+
+### Request Body
+```typescript
+interface CommentCreate {
+  commentContent: string; // Length: 1-1000 characters
+  parentCommentID?: number; // Provide this if replying to a comment
+  authorPageID?: number; // Page ID if commenting as a business page
+}
+```
+
+### Response Structure
+```typescript
+interface CommentResponse {
+  id: number;
+  postID: number;
+  commentAuthorID: number;
+  author: UserProfile; // See Section 1
+  authorPageID: number | null;
+  authorPage?: any; // Page info if commented by a page
+  commentContent: string;
+  commentLikeCount: number;
+  parentCommentID: number | null;
+  createdAt: string; // ISO DateTime
+  updatedAt: string | null;
+  isLiked: boolean;
+  replies?: CommentResponse[];
+}
+```
+
+---
+
+## 14. Get Comments for a Post
+Fetches comments for a specific post. Supports pagination for top-level comments and returns nested replies.
+
+**Endpoint:** `GET /feed/posts/{post_id}/comments`
+
+### Query Parameters
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `page` | number | `1` | Page number for top-level comments |
+| `limit` | number | `20` | Comments per page |
+
+### Headers (Optional)
+| Header | Description |
+| :--- | :--- |
+| `x-page-id` | Page ID to fetch comment context for a specific Business Page. |
+
+### Response Structure
+```typescript
+interface CommentsResponse {
+  comments: CommentResponse[]; // See Section 13
+  total: number; // Total top-level comments
+  totalAll: number; // Total all comments including replies
+  page: number;
+  limit: number;
+  hasNext: boolean;
+}
+```
+
+---
+
+## 15. Share/Repost a Post
+Shares or reposts an existing post to the user's feed.
+
+**Endpoint:** `POST /feed/posts/{post_id}/repost`  
+**Endpoint:** `POST /feed/posts/{post_id}/share`
+
+*(Note: `/repost` creates a new post referencing the original, returning a `PostResponse`. `/share` tracks a share interaction returning a `MessageResponse`)*
+
+---
+
+## 16. Send Connection Request
+Sends a connection request to another user.
+
+**Endpoint:** `POST /connections/request`
+
+### Request Body
+```typescript
+interface ConnectionRequestCreate {
+  connectionRequestReceiverID: number; // User ID to connect with
+  message?: string; // Optional custom message (Max length: 500)
+}
+```
+
+### Response Structure
+```typescript
+interface ConnectionRequestResponse {
+  id: number;
+  connectionRequestSenderID: number;
+  connectionRequestReceiverID: number;
+  sender: UserProfile; // See Section 1
+  receiver: UserProfile; // See Section 1
+  message: string | null;
+  status: "pending" | "accepted" | "rejected" | "canceled";
+  respondedAt: string | null; // ISO DateTime
+  createdAt: string; // ISO DateTime
+}
 ```
