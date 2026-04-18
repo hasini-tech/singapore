@@ -66,7 +66,7 @@ export default function CommentSection({ postId, onCommentCountChange }: Comment
       setComments((prev) =>
         prev.map((c) =>
           c.id === comment.parentCommentID
-            ? { ...c, replies: [...c.replies, comment] }
+            ? { ...c, replies: [...(c.replies || []), comment] }
             : c
         )
       );
@@ -84,7 +84,7 @@ export default function CommentSection({ postId, onCommentCountChange }: Comment
         setComments((prev) =>
           prev.map((c) =>
             c.id === parentId
-              ? { ...c, replies: c.replies.filter((r) => r.id !== commentId) }
+              ? { ...c, replies: (c.replies || []).filter((r) => r.id !== commentId) }
               : c
           )
         );
@@ -255,7 +255,7 @@ function CommentItem({
         )}
 
         {/* Nested Replies */}
-        {comment.replies?.length > 0 && (
+        {comment.replies && comment.replies.length > 0 && (
           <>
             {!showReplies && (
               <button

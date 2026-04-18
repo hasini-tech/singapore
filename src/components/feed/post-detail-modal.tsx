@@ -75,7 +75,7 @@ export default function PostDetailModal({
 
   // Open lightbox immediately if initialMediaIndex provided
   useEffect(() => {
-    if (isOpen && post && initialMediaIndex >= 0 && post.attachments.length > 0) {
+    if (isOpen && post && initialMediaIndex >= 0 && post.attachments && post.attachments.length > 0) {
       setLightboxOpen(true);
       setLightboxIndex(initialMediaIndex);
     }
@@ -134,13 +134,13 @@ export default function PostDetailModal({
   };
 
   const name = `${post.author.firstName} ${post.author.lastName}`;
-  const hasMedia = post.attachments.length > 0;
-  const mediaItems: MediaItem[] = post.attachments.map((att) => ({
+  const hasMedia = post.attachments && post.attachments.length > 0;
+  const mediaItems: MediaItem[] = post.attachments?.map((att) => ({
     id: att.id,
     type: att.postAttachmentType,
     url: att.postAttachmentUrl,
     title: att.postAttachmentTitle,
-  }));
+  })) || [];
 
   const visibilityIcon = {
     public: <PiGlobeSimpleBold className="h-3 w-3" />,
@@ -191,7 +191,7 @@ export default function PostDetailModal({
               <div className="relative hidden w-[55%] flex-shrink-0 bg-black md:block">
                 {/* Current media */}
                 <div className="relative flex h-full items-center justify-center">
-                  {post.attachments[mediaIndex]?.postAttachmentType === 'image' ? (
+                  {post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'image' ? (
                     <Image
                       src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
                       alt={post.attachments[mediaIndex].postAttachmentTitle || 'Post image'}
@@ -203,7 +203,7 @@ export default function PostDetailModal({
                         setLightboxOpen(true);
                       }}
                     />
-                  ) : post.attachments[mediaIndex]?.postAttachmentType === 'video' ? (
+                  ) : post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'video' ? (
                     <video
                       src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
                       className="max-h-full max-w-full"
@@ -234,7 +234,7 @@ export default function PostDetailModal({
                 </div>
 
                 {/* Media nav arrows */}
-                {post.attachments.length > 1 && (
+                {post.attachments && post.attachments.length > 1 && (
                   <>
                     <button
                       className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white/80 transition-colors hover:bg-black/60"
@@ -333,7 +333,7 @@ export default function PostDetailModal({
                   </p>
 
                   {/* Hashtags */}
-                  {post.postHashTags.length > 0 && (
+                  {post.postHashTags && post.postHashTags.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {post.postHashTags.map((tag) => (
                         <span
@@ -348,7 +348,7 @@ export default function PostDetailModal({
                 </div>
 
                 {/* Mobile media (shown when left panel hidden) */}
-                {hasMedia && (
+                {hasMedia && post.attachments && (
                   <div className="px-4 pb-3 md:hidden">
                     <div
                       className={cn(

@@ -77,16 +77,17 @@ export interface PostResponse {
   viewsCount: number;
   repostsCount: number;
   postVisibility: "public" | "connections" | "private";
-  postHashTags: string[];
+  postHashTags: string[] | null;
   attachments: Array<{
     id: number;
     postAttachmentType: "image" | "video" | "document" | "link";
     postAttachmentUrl: string;
     postAttachmentTitle: string | null;
-  }>;
+  }> | null;
   createdAt: string;
   isLiked: boolean;
   isSaved: boolean;
+  repostedPost?: PostResponse | null;
 }
 
 export interface FeedResponse {
@@ -119,7 +120,7 @@ export interface CommentResponse {
   createdAt: string;
   updatedAt: string;
   isLiked: boolean;
-  replies: CommentResponse[];
+  replies: CommentResponse[] | null;
 }
 
 export interface CommentsListResponse {

@@ -74,7 +74,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
   }, []);
 
   useEffect(() => {
-    if (post.attachments.every((a) => a.postAttachmentType !== 'video')) return;
+    if (!post.attachments || post.attachments.every((a) => a.postAttachmentType !== 'video')) return;
     const viewportHeight = window.innerHeight;
     const threshold = viewportHeight * 2;
 
@@ -354,7 +354,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
         )}
 
         {/* Attachments - Media Gallery */}
-        {post.attachments.length > 0 && (
+        {post.attachments && post.attachments.length > 0 && (
           <div
             className={cn(
               'mb-3 grid gap-1 px-4',
@@ -366,8 +366,8 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                 key={att.id}
                 className={cn(
                   'group relative cursor-pointer overflow-hidden rounded-xl bg-gray-50 aspect-video',
-                  post.attachments.length === 1 ? 'h-[320px]' : 'h-[180px]',
-                  post.attachments.length === 3 && idx === 0 ? 'col-span-2' : ''
+                  post.attachments?.length === 1 ? 'h-[320px]' : 'h-[180px]',
+                  post.attachments?.length === 3 && idx === 0 ? 'col-span-2' : ''
                 )}
                 onClick={() => {
                   if (att.postAttachmentType === 'video') return; // let video controls work
@@ -400,7 +400,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                   </div>
                 )}
 
-                {idx === 3 && post.attachments.length > 4 && (
+                {idx === 3 && post.attachments && post.attachments.length > 4 && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-lg font-bold text-white">
                     +{post.attachments.length - 4}
                   </div>
@@ -502,7 +502,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
 
       {/* Fullscreen Media Lightbox */}
       <MediaLightbox
-        items={post.attachments.map((att) => ({
+        items={(post.attachments || []).map((att) => ({
           id: att.id,
           type: att.postAttachmentType,
           url: att.postAttachmentUrl,
