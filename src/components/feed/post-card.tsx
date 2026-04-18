@@ -37,6 +37,7 @@ import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
 import MediaLightbox, { MediaItem } from './media-lightbox';
 import PostDetailModal from './post-detail-modal';
+import RepostedPost from './reposted-post';
 import ElegantTable from '@/app/shared/tables/basic/elegant';
 
 interface PostCardProps {
@@ -349,6 +350,10 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
               <span className="mt-1 inline-block text-xs font-semibold text-primary hover:underline">
                 ...see more
               </span>
+            )}
+            
+            {post.repostedPost && (
+              <RepostedPost post={post.repostedPost} />
             )}
           </div>
         )}

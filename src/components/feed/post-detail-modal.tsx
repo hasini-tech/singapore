@@ -35,6 +35,7 @@ import { toast } from 'react-hot-toast';
 import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
 import MediaLightbox, { MediaItem } from './media-lightbox';
+import RepostedPost from './reposted-post';
 
 interface PostDetailModalProps {
   post: Post | null;
@@ -193,8 +194,8 @@ export default function PostDetailModal({
                 <div className="relative flex h-full items-center justify-center">
                   {post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'image' ? (
                     <Image
-                      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
-                      alt={post.attachments[mediaIndex].postAttachmentTitle || 'Post image'}
+                      src={getApiMediaUrl(post.attachments[mediaIndex]?.postAttachmentUrl || '')}
+                      alt={post.attachments[mediaIndex]?.postAttachmentTitle || 'Post image'}
                       fill
                       className="cursor-pointer object-contain"
                       sizes="55vw"
@@ -205,7 +206,7 @@ export default function PostDetailModal({
                     />
                   ) : post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'video' ? (
                     <video
-                      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
+                      src={getApiMediaUrl(post.attachments[mediaIndex]?.postAttachmentUrl || '')}
                       className="max-h-full max-w-full"
                       controls
                       autoPlay
@@ -214,13 +215,13 @@ export default function PostDetailModal({
                     <div className="flex flex-col items-center gap-3 p-8 text-center text-white/60">
                       <PiArrowSquareOutBold className="h-12 w-12" />
                       <Text className="text-sm">
-                        {post.attachments[mediaIndex]?.postAttachmentTitle || 'Document'}
+                        {post.attachments?.[mediaIndex]?.postAttachmentTitle || 'Document'}
                       </Text>
                     </div>
                   )}
 
                   {/* Fullscreen button */}
-                  {post.attachments[mediaIndex]?.postAttachmentType === 'image' && (
+                  {post.attachments?.[mediaIndex]?.postAttachmentType === 'image' && (
                     <button
                       className="absolute bottom-4 right-4 rounded-lg bg-black/50 p-2 text-white/80 transition-colors hover:bg-black/70 hover:text-white"
                       onClick={() => {
@@ -239,7 +240,7 @@ export default function PostDetailModal({
                     <button
                       className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white/80 transition-colors hover:bg-black/60"
                       onClick={() =>
-                        setMediaIndex((p) => (p > 0 ? p - 1 : post.attachments.length - 1))
+                        setMediaIndex((p) => (p > 0 ? p - 1 : (post.attachments?.length || 1) - 1))
                       }
                     >
                       <PiCaretLeftBold className="h-4 w-4" />
@@ -247,7 +248,7 @@ export default function PostDetailModal({
                     <button
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white/80 transition-colors hover:bg-black/60"
                       onClick={() =>
-                        setMediaIndex((p) => (p < post.attachments.length - 1 ? p + 1 : 0))
+                        setMediaIndex((p) => (p < (post.attachments?.length || 0) - 1 ? p + 1 : 0))
                       }
                     >
                       <PiCaretRightBold className="h-4 w-4" />
@@ -255,7 +256,7 @@ export default function PostDetailModal({
 
                     {/* Dots indicator */}
                     <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
-                      {post.attachments.map((_, idx) => (
+                      {post.attachments?.map((_, idx) => (
                         <button
                           key={idx}
                           onClick={() => setMediaIndex(idx)}
@@ -345,6 +346,10 @@ export default function PostDetailModal({
                       ))}
                     </div>
                   )}
+
+                  {post.repostedPost && (
+                    <RepostedPost post={post.repostedPost} className="mt-4" />
+                  )}
                 </div>
 
                 {/* Mobile media (shown when left panel hidden) */}
@@ -361,8 +366,8 @@ export default function PostDetailModal({
                           key={att.id}
                           className={cn(
                             'relative cursor-pointer overflow-hidden rounded-xl bg-gray-50',
-                            post.attachments.length === 1 ? 'aspect-video' : 'aspect-square',
-                            post.attachments.length === 3 && idx === 0 ? 'col-span-2 aspect-video' : ''
+                            post.attachments?.length === 1 ? 'aspect-video' : 'aspect-square',
+                            post.attachments?.length === 3 && idx === 0 ? 'col-span-2 aspect-video' : ''
                           )}
                           onClick={() => {
                             setLightboxIndex(idx);
@@ -381,7 +386,7 @@ export default function PostDetailModal({
                               <PiPlayFill className="h-10 w-10 text-white/80" />
                             </div>
                           ) : null}
-                          {idx === 3 && post.attachments.length > 4 && (
+                          {idx === 3 && post.attachments && post.attachments.length > 4 && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-lg font-bold text-white">
                               +{post.attachments.length - 4}
                             </div>
