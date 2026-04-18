@@ -87,7 +87,9 @@ export interface PostResponse {
   createdAt: string;
   isLiked: boolean;
   isSaved: boolean;
-  repostedPost?: PostResponse | null;
+  isRepost?: boolean;
+  originalPostID?: number | null;
+  originalPost?: PostResponse | null;
 }
 
 export interface FeedResponse {

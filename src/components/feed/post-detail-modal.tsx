@@ -35,7 +35,6 @@ import { toast } from 'react-hot-toast';
 import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
 import MediaLightbox, { MediaItem } from './media-lightbox';
-import RepostedPost from './reposted-post';
 
 interface PostDetailModalProps {
   post: Post | null;
@@ -194,8 +193,8 @@ export default function PostDetailModal({
                 <div className="relative flex h-full items-center justify-center">
                   {post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'image' ? (
                     <Image
-                      src={getApiMediaUrl(post.attachments[mediaIndex]?.postAttachmentUrl || '')}
-                      alt={post.attachments[mediaIndex]?.postAttachmentTitle || 'Post image'}
+                      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
+                      alt={post.attachments[mediaIndex].postAttachmentTitle || 'Post image'}
                       fill
                       className="cursor-pointer object-contain"
                       sizes="55vw"
@@ -206,7 +205,7 @@ export default function PostDetailModal({
                     />
                   ) : post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'video' ? (
                     <video
-                      src={getApiMediaUrl(post.attachments[mediaIndex]?.postAttachmentUrl || '')}
+                      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
                       className="max-h-full max-w-full"
                       controls
                       autoPlay
@@ -248,7 +247,7 @@ export default function PostDetailModal({
                     <button
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white/80 transition-colors hover:bg-black/60"
                       onClick={() =>
-                        setMediaIndex((p) => (p < (post.attachments?.length || 0) - 1 ? p + 1 : 0))
+                        setMediaIndex((p) => (p < (post.attachments?.length || 1) - 1 ? p + 1 : 0))
                       }
                     >
                       <PiCaretRightBold className="h-4 w-4" />
@@ -346,10 +345,6 @@ export default function PostDetailModal({
                       ))}
                     </div>
                   )}
-
-                  {post.repostedPost && (
-                    <RepostedPost post={post.repostedPost} className="mt-4" />
-                  )}
                 </div>
 
                 {/* Mobile media (shown when left panel hidden) */}
@@ -361,7 +356,7 @@ export default function PostDetailModal({
                         post.attachments.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                       )}
                     >
-                      {post.attachments.slice(0, 4).map((att, idx) => (
+                      {post.attachments?.slice(0, 4).map((att, idx) => (
                         <div
                           key={att.id}
                           className={cn(
@@ -393,6 +388,42 @@ export default function PostDetailModal({
                           )}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Repost Original Post */}
+                {post.isRepost && post.originalPost && (
+                  <div 
+                    className="mx-4 mb-3 overflow-hidden rounded-xl border border-muted bg-gray-50/50 dark:bg-gray-800/30 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/60"
+                  >
+                    <div className="p-3">
+                      <div className="mb-2 flex items-center gap-2">
+                        <Avatar
+                          name={`${post.originalPost.author.firstName} ${post.originalPost.author.lastName}`}
+                          src={getApiMediaUrl(post.originalPost.author.avatarURL) || '/growthlab/founder.jpg'}
+                          size="sm"
+                          className="h-6 w-6"
+                        />
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Text className="truncate text-xs font-bold">
+                            {post.originalPost.author.firstName} {post.originalPost.author.lastName}
+                          </Text>
+                          <Text className="text-[10px] text-gray-400 whitespace-nowrap">
+                            • {dayjs(post.originalPost.createdAt).fromNow()}
+                          </Text>
+                        </div>
+                      </div>
+                      <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-gray-700 line-clamp-3">
+                        {post.originalPost.postContent}
+                      </p>
+                      
+                      {post.originalPost.attachments && post.originalPost.attachments.length > 0 && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/5 w-fit px-2 py-1 rounded-md">
+                          <PiArrowSquareOutBold className="h-3 w-3" />
+                          View Original Attachments ({post.originalPost.attachments.length})
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

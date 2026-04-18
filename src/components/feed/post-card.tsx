@@ -37,7 +37,6 @@ import CommentSection from './comment-section';
 import ShareDialog from './share-dialog';
 import MediaLightbox, { MediaItem } from './media-lightbox';
 import PostDetailModal from './post-detail-modal';
-import RepostedPost from './reposted-post';
 import ElegantTable from '@/app/shared/tables/basic/elegant';
 
 interface PostCardProps {
@@ -351,10 +350,6 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                 ...see more
               </span>
             )}
-            
-            {post.repostedPost && (
-              <RepostedPost post={post.repostedPost} />
-            )}
           </div>
         )}
 
@@ -412,6 +407,42 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Repost Original Post */}
+        {post.isRepost && post.originalPost && (
+          <div 
+            className="mx-4 mb-3 overflow-hidden rounded-xl border border-muted bg-gray-50/50 dark:bg-gray-800/30 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/60"
+          >
+            <div className="p-3">
+              <div className="mb-2 flex items-center gap-2">
+                <Avatar
+                  name={`${post.originalPost.author.firstName} ${post.originalPost.author.lastName}`}
+                  src={getApiMediaUrl(post.originalPost.author.avatarURL) || '/growthlab/founder.jpg'}
+                  size="sm"
+                  className="h-6 w-6"
+                />
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Text className="truncate text-xs font-bold">
+                    {post.originalPost.author.firstName} {post.originalPost.author.lastName}
+                  </Text>
+                  <Text className="text-[10px] text-gray-400 whitespace-nowrap">
+                    • {dayjs(post.originalPost.createdAt).fromNow()}
+                  </Text>
+                </div>
+              </div>
+              <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-gray-700 line-clamp-3">
+                {post.originalPost.postContent}
+              </p>
+              
+              {post.originalPost.attachments && post.originalPost.attachments.length > 0 && (
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/5 w-fit px-2 py-1 rounded-md">
+                  <PiArrowSquareOutBold className="h-3 w-3" />
+                  View Original Attachments ({post.originalPost.attachments.length})
+                </div>
+              )}
+            </div>
           </div>
         )}
 
