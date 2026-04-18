@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+Allow: /growthlab-logo.png
+Allow: /favicon.ico
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+
+# Allow all public pages
+Allow: /
+Allow: /about
+Allow: /events
+Allow: /blog
+Allow: /connect
+Allow: /launch
+Allow: /fund
+Allow: /grow
+Allow: /pricing
+Allow: /contact
+Allow: /resources
+Allow: /partners
+Allow: /stories
+Allow: /founder
+Allow: /sports-club
+
+# Sitemap location
+Sitemap: https://www.growthlab.sg/sitemap.xml
+
+# Crawl delay (optional, adjust as needed)
+Crawl-delay: 1
+

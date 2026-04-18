@@ -1,0 +1,2 @@
+'use client'; export default function GrowthLabLogo({ size = 40 }: { size?: number }) { return ( <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-teal-600" > <rect width="100" height="100" rx="20" fill="currentColor" fillOpacity="0.1" /> <path d="M30 70V30L50 50L70 30V70" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" /> <circle cx="50" cy="50" r="10" fill="currentColor" /> </svg> );
+}
