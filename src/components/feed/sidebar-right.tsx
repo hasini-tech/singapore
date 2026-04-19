@@ -55,8 +55,27 @@ export default function SidebarRight() {
         )
       );
       toast.success('Connection request sent!');
-    } catch {
-      toast.error('Failed to send request');
+    } catch (err) {
+      // Backend may report a stale "already pending"/"already connected" state
+      // because its recommendations cache is not invalidated reliably. Reconcile
+      // the UI so the user sees the correct button instead of a confusing error.
+      const message = err instanceof Error ? err.message.toLowerCase() : '';
+
+      if (message.includes('already pending')) {
+        setRecommendations((prev) =>
+          prev.map((p) =>
+            p.id === personId
+              ? { ...p, connectionStatus: 'pending_sent' as const, isRequestSent: true }
+              : p
+          )
+        );
+        toast.success('Connection request already pending');
+      } else if (message.includes('already connected')) {
+        setRecommendations((prev) => prev.filter((p) => p.id !== personId));
+        toast.success('You are already connected');
+      } else {
+        toast.error('Failed to send request');
+      }
     } finally {
       setConnectingIds((prev) => {
         const next = new Set(prev);

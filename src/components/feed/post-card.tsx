@@ -59,6 +59,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailMediaIndex, setDetailMediaIndex] = useState(-1);
+  const [detailPost, setDetailPost] = useState<Post>(post);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editSaving, setEditSaving] = useState(false);
@@ -342,7 +343,11 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
         ) : (
           <div
             className="cursor-pointer px-4 pb-3 text-sm leading-relaxed text-gray-700"
-            onClick={() => { setDetailMediaIndex(-1); setDetailOpen(true); }}
+            onClick={() => {
+              setDetailPost(post);
+              setDetailMediaIndex(-1);
+              setDetailOpen(true);
+            }}
           >
             <p className="whitespace-pre-wrap line-clamp-6">{currentContent}</p>
             {currentContent.length > 400 && (
@@ -369,8 +374,10 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                   post.attachments?.length === 1 ? 'h-[320px]' : 'h-[180px]',
                   post.attachments?.length === 3 && idx === 0 ? 'col-span-2' : ''
                 )}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (att.postAttachmentType === 'video') return; // let video controls work
+                  setDetailPost(post);
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
                 }}
@@ -412,21 +419,38 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
 
         {/* Repost Original Post */}
         {post.isRepost && post.originalPost && (
-          <div 
-            className="mx-4 mb-3 overflow-hidden rounded-xl border border-muted bg-gray-50/50 dark:bg-gray-800/30 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/60"
+          <div
+            className="mx-4 mb-3 cursor-pointer overflow-hidden rounded-xl border border-muted bg-gray-50/50 transition-colors hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-800/60"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDetailPost(post.originalPost!);
+              setDetailMediaIndex(-1);
+              setDetailOpen(true);
+            }}
           >
             <div className="p-3">
               <div className="mb-2 flex items-center gap-2">
-                <Avatar
-                  name={`${post.originalPost.author.firstName} ${post.originalPost.author.lastName}`}
-                  src={getApiMediaUrl(post.originalPost.author.avatarURL) || '/growthlab/founder.jpg'}
-                  size="sm"
-                  className="h-6 w-6"
-                />
+                <Link 
+                  href={`/profile/${post.originalPost.author.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Avatar
+                    name={`${post.originalPost.author.firstName} ${post.originalPost.author.lastName}`}
+                    src={getApiMediaUrl(post.originalPost.author.avatarURL) || '/growthlab/founder.jpg'}
+                    size="sm"
+                    className="h-6 w-6"
+                  />
+                </Link>
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <Text className="truncate text-xs font-bold">
-                    {post.originalPost.author.firstName} {post.originalPost.author.lastName}
-                  </Text>
+                  <Link 
+                    href={`/profile/${post.originalPost.author.id}`}
+                    className="transition-colors hover:text-primary"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Text className="truncate text-xs font-bold">
+                      {post.originalPost.author.firstName} {post.originalPost.author.lastName}
+                    </Text>
+                  </Link>
                   <Text className="text-[10px] text-gray-400 whitespace-nowrap">
                     • {dayjs(post.originalPost.createdAt).fromNow()}
                   </Text>
@@ -551,7 +575,7 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
 
       {/* Detailed Post View */}
       <PostDetailModal
-        post={post}
+        post={detailPost}
         isOpen={detailOpen}
         onClose={() => setDetailOpen(false)}
         onDeleted={onDeleted}
