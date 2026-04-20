@@ -18,7 +18,6 @@ import {
   PiBookmarkSimpleFill,
   PiTrashBold,
   PiCopyBold,
-  PiPlayFill,
   PiPencilSimpleBold,
   PiCheckBold,
   PiXBold,
@@ -390,14 +389,15 @@ export default function PostCard({ post, className, onDeleted }: PostCardProps) 
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : att.postAttachmentType === 'video' ? (
-                  <div className="flex h-full w-full items-center justify-center bg-black">
-                    <video
-                      ref={(el) => setVideoRef(att.id, el)}
-                      src={getApiMediaUrl(att.postAttachmentUrl)}
-                      className="h-full w-full object-contain"
-                      controls
-                    />
-                  </div>
+                  <video
+                    ref={(el) => setVideoRef(att.id, el)}
+                    src={getApiMediaUrl(att.postAttachmentUrl)}
+                    className="absolute inset-0 h-full w-full object-contain bg-black"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
                     <PiArrowSquareOutBold className="h-8 w-8 text-gray-400" />

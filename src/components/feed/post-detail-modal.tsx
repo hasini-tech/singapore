@@ -16,7 +16,6 @@ import {
   PiArrowSquareOutBold,
   PiBookmarkSimpleBold,
   PiBookmarkSimpleFill,
-  PiPlayFill,
   PiCaretLeftBold,
   PiCaretRightBold,
   PiEyeBold,
@@ -204,12 +203,14 @@ export default function PostDetailModal({
                       }}
                     />
                   ) : post.attachments && post.attachments[mediaIndex]?.postAttachmentType === 'video' ? (
-                    <video
-                      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
-                      className="max-h-full max-w-full"
-                      controls
-                      autoPlay
-                    />
+    <video
+      src={getApiMediaUrl(post.attachments[mediaIndex].postAttachmentUrl)}
+      className="max-h-full max-w-full"
+      controls
+      playsInline
+      preload="auto"
+      autoPlay
+    />
                   ) : (
                     <div className="flex flex-col items-center gap-3 p-8 text-center text-white/60">
                       <PiArrowSquareOutBold className="h-12 w-12" />
@@ -376,11 +377,15 @@ export default function PostDetailModal({
                               fill
                               className="object-cover"
                             />
-                          ) : att.postAttachmentType === 'video' ? (
-                            <div className="flex h-full items-center justify-center bg-black">
-                              <PiPlayFill className="h-10 w-10 text-white/80" />
-                            </div>
-                          ) : null}
+) : att.postAttachmentType === 'video' ? (
+                  <video
+                    src={getApiMediaUrl(att.postAttachmentUrl)}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : null}
                           {idx === 3 && post.attachments && post.attachments.length > 4 && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-lg font-bold text-white">
                               +{post.attachments.length - 4}

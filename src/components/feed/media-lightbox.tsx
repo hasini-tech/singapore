@@ -154,13 +154,15 @@ export default function MediaLightbox({
                 animate={{ opacity: 1 }}
                 className="flex h-full w-full items-center justify-center"
               >
-                <video
-                  ref={videoRef}
-                  src={mediaUrl}
-                  className="max-h-full max-w-full"
-                  controls
-                  autoPlay
-                />
+      <video
+        ref={videoRef}
+        src={mediaUrl}
+        className="max-h-full max-w-full"
+        controls
+        playsInline
+        preload="auto"
+        autoPlay
+      />
               </motion.div>
             ) : null}
           </div>
