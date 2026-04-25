@@ -8,11 +8,12 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default function CreateEventContinuePage({
+export default async function CreateEventContinuePage({
   searchParams,
 }: {
-  searchParams?: { redirect?: string };
+  searchParams?: Promise<{ redirect?: string }>;
 }) {
-  const redirectPath = searchParams?.redirect || '/create-event/form';
+  const resolvedSearchParams = await searchParams;
+  const redirectPath = resolvedSearchParams?.redirect || '/create-event/form';
   return <EmailOtpGate redirectPath={redirectPath} />;
 }

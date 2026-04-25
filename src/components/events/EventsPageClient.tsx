@@ -4,8 +4,51 @@ import React from 'react';
 import Link from 'next/link';
 import { CalendarDays, MapPin, Plus, Sparkles, Ticket } from 'lucide-react';
 import { routes } from '@/config/routes';
+import { useMedia } from '@/hooks/use-media';
 
 export default function EventsPageClient() {
+  const isMobile = useMedia('(max-width: 768px)', false);
+
+  const heroGridStyle: React.CSSProperties = {
+    ...eventsHeroGridStyle,
+    gridTemplateColumns: isMobile ? '1fr' : eventsHeroGridStyle.gridTemplateColumns,
+    gap: isMobile ? '22px' : eventsHeroGridStyle.gap,
+  };
+
+  const heroCopyStyle: React.CSSProperties = {
+    ...eventsHeroCopyStyle,
+    gap: isMobile ? '18px' : eventsHeroCopyStyle.gap,
+    maxWidth: isMobile ? '100%' : eventsHeroCopyStyle.maxWidth,
+  };
+
+  const heroTitleStyle: React.CSSProperties = {
+    ...eventsHeroTitleStyle,
+    fontSize: isMobile ? 'clamp(2.15rem, 11vw, 3.4rem)' : eventsHeroTitleStyle.fontSize,
+  };
+
+  const heroActionsStyle: React.CSSProperties = {
+    ...eventsHeroActionsStyle,
+    flexDirection: isMobile ? 'column' : 'row',
+    alignItems: isMobile ? 'stretch' : 'center',
+  };
+
+  const heroVisualStyle: React.CSSProperties = {
+    ...eventsHeroVisualStyle,
+    justifyItems: 'center',
+  };
+
+  const heroMockCardStyle: React.CSSProperties = {
+    ...eventsHeroMockCardStyle,
+    width: isMobile ? '100%' : eventsHeroMockCardStyle.width,
+    transform: isMobile ? 'none' : eventsHeroMockCardStyle.transform,
+    padding: isMobile ? '16px' : eventsHeroMockCardStyle.padding,
+  };
+
+  const heroPreviewArtStyle: React.CSSProperties = {
+    ...eventsHeroPreviewArtStyle,
+    minHeight: isMobile ? '140px' : eventsHeroPreviewArtStyle.minHeight,
+  };
+
   return (
     <main
       className="events-page"
@@ -13,15 +56,26 @@ export default function EventsPageClient() {
         minHeight: '100vh',
       }}
     >
-      <section className="page-shell" style={{ paddingTop: '28px', paddingBottom: '60px', maxWidth: '1440px', width: '100%', margin: '0 auto', paddingLeft: '40px', paddingRight: '40px' }}>
-        <div style={eventsHeroGridStyle}>
-          <div style={eventsHeroCopyStyle}>
-            <div className="eyebrow" style={{ width: 'fit-content', padding: '8px 12px', fontSize: '0.8rem' }}>
+      <section
+        className="page-shell"
+        style={{
+          paddingTop: '28px',
+          paddingBottom: '60px',
+          maxWidth: '1440px',
+          width: '100%',
+          margin: '0 auto',
+          paddingLeft: isMobile ? '20px' : '40px',
+          paddingRight: isMobile ? '20px' : '40px',
+        }}
+      >
+        <div style={heroGridStyle}>
+          <div style={heroCopyStyle}>
+            <div className="eyebrow" style={{ width: 'fit-content', padding: '8px 12px', fontSize: isMobile ? '0.74rem' : '0.8rem' }}>
               GrowthLab Events
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
-              <h1 style={eventsHeroTitleStyle}>
+              <h1 style={heroTitleStyle}>
                 Delightful events <span style={{ color: 'var(--primary-color)' }}>start here.</span>
               </h1>
               <p style={eventsHeroCopyTextStyle}>
@@ -30,30 +84,30 @@ export default function EventsPageClient() {
               </p>
             </div>
 
-            <div style={eventsHeroActionsStyle}>
-              <Link href={routes.createEvent} className="primary-button">
+            <div style={heroActionsStyle}>
+              <Link href={routes.createEvent} className="primary-button" style={isMobile ? { width: '100%' } : undefined}>
                 <Plus size={16} />
                 Create Event
               </Link>
-              <Link href={routes.eventsBrowse} className="secondary-button">
+              <Link href={routes.eventsBrowse} className="secondary-button" style={isMobile ? { width: '100%' } : undefined}>
                 Browse Events
               </Link>
-              <Link href={routes.discover} className="secondary-button">
+              <Link href={routes.discover} className="secondary-button" style={isMobile ? { width: '100%' } : undefined}>
                 Discover Event
               </Link>
             </div>
 
           </div>
 
-          <div style={eventsHeroVisualStyle}>
+          <div style={heroVisualStyle}>
             <div style={eventsHeroGlowStyle} />
-            <div style={eventsHeroMockCardStyle}>
+            <div style={heroMockCardStyle}>
               <div style={eventsHeroPhoneHeaderStyle}>
                 <span>9:41</span>
                 <span>5G</span>
               </div>
               <div style={eventsHeroPreviewStyle}>
-                <div style={eventsHeroPreviewArtStyle}>
+                <div style={heroPreviewArtStyle}>
                   <Sparkles size={40} color="rgba(15, 115, 119, 0.42)" />
                 </div>
               </div>

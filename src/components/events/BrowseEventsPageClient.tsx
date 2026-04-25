@@ -7,6 +7,7 @@ import { useAuth } from '@/context/auth-context';
 import api from '@/lib/api';
 import { routes } from '@/config/routes';
 import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
+import { useMedia } from '@/hooks/use-media';
 
 type EventsTab = 'upcoming' | 'past';
 type EventsMode = 'personal' | 'public';
@@ -329,6 +330,7 @@ function formatTicketStatus(status?: string) {
 }
 
 function EmptyState({ tab, personalMode }: { tab: EventsTab; personalMode: boolean }) {
+  const isMobile = useMedia('(max-width: 768px)', false);
   const heading = tab === 'upcoming' ? 'No upcoming events yet' : 'No past events yet';
   const description =
     tab === 'upcoming'
@@ -344,16 +346,16 @@ function EmptyState({ tab, personalMode }: { tab: EventsTab; personalMode: boole
       className="surface-panel"
       style={{
         borderRadius: '24px',
-        padding: '42px 20px',
+        padding: isMobile ? '32px 16px' : '42px 20px',
         textAlign: 'center',
       }}
     >
       <div
         style={{
-          width: '84px',
-          height: '84px',
+          width: isMobile ? '72px' : '84px',
+          height: isMobile ? '72px' : '84px',
           margin: '0 auto 18px',
-          borderRadius: '24px',
+          borderRadius: isMobile ? '22px' : '24px',
           background: 'var(--primary-soft)',
           color: 'var(--primary-color)',
           display: 'grid',
@@ -362,7 +364,7 @@ function EmptyState({ tab, personalMode }: { tab: EventsTab; personalMode: boole
       >
         <Sparkles size={30} />
       </div>
-      <h2 style={{ margin: '0 0 10px', fontSize: '1.7rem', letterSpacing: '-0.04em' }}>{heading}</h2>
+        <h2 style={{ margin: '0 0 10px', fontSize: isMobile ? '1.5rem' : '1.7rem', letterSpacing: '-0.04em' }}>{heading}</h2>
       <p
         style={{
           margin: 0,
@@ -376,7 +378,7 @@ function EmptyState({ tab, personalMode }: { tab: EventsTab; personalMode: boole
       </p>
       {tab === 'upcoming' && personalMode && (
         <div style={{ marginTop: '22px' }}>
-          <Link href={routes.createEvent} className="primary-button">
+          <Link href={routes.createEvent} className="primary-button" style={isMobile ? { width: '100%' } : undefined}>
             <Plus size={18} />
             Create Event
           </Link>
@@ -387,16 +389,19 @@ function EmptyState({ tab, personalMode }: { tab: EventsTab; personalMode: boole
 }
 
 function EventCover({ event }: { event: EventRecord }) {
+  const isMobile = useMedia('(max-width: 768px)', false);
+
   return (
     <div
       style={{
-        width: '112px',
-        height: '112px',
+        width: isMobile ? '100%' : '112px',
+        height: isMobile ? '180px' : '112px',
         borderRadius: '18px',
         overflow: 'hidden',
         border: '1px solid var(--border-color)',
         background: 'var(--teal-050)',
         flexShrink: 0,
+        aspectRatio: isMobile ? '16 / 9' : undefined,
       }}
     >
       <img
@@ -409,6 +414,8 @@ function EventCover({ event }: { event: EventRecord }) {
 }
 
 function Timeline({ groups }: { groups: EventGroup[] }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
+
   return (
     <div style={{ display: 'grid', gap: '26px' }}>
       {groups.map((group) => (
@@ -416,15 +423,15 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
           key={group.key}
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(96px, 132px) 1fr',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(96px, 132px) 1fr',
             gap: '0',
             alignItems: 'start',
           }}
         >
-          <div style={{ paddingRight: '14px' }}>
+          <div style={{ paddingRight: isMobile ? '0' : '14px', paddingBottom: isMobile ? '8px' : '0' }}>
             <div
               style={{
-                fontSize: '1.6rem',
+                fontSize: isMobile ? '1.35rem' : '1.6rem',
                 fontWeight: 800,
                 color: 'var(--primary-color)',
                 marginBottom: '2px',
@@ -443,8 +450,8 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
               position: 'relative',
               display: 'grid',
               gap: '14px',
-              paddingLeft: '26px',
-              borderLeft: '1px solid var(--events-divider)',
+              paddingLeft: isMobile ? '0' : '26px',
+              borderLeft: isMobile ? 'none' : '1px solid var(--events-divider)',
             }}
           >
             {group.items.map((event) => {
@@ -478,15 +485,15 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                     className="surface-panel"
                     style={{
                       borderRadius: '24px',
-                      padding: '20px',
+                      padding: isMobile ? '16px' : '20px',
                       display: 'grid',
-                      gridTemplateColumns: 'minmax(0, 1fr) auto',
-                      gap: '20px',
-                      alignItems: 'center',
+                      gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) auto',
+                      gap: isMobile ? '16px' : '20px',
+                      alignItems: isMobile ? 'stretch' : 'center',
                       minHeight: '184px',
                     }}
                   >
-                    <div style={{ display: 'grid', gap: '12px', paddingLeft: '4px' }}>
+                    <div style={{ display: 'grid', gap: '12px', paddingLeft: isMobile ? '0' : '4px' }}>
                       <div
                         style={{
                           display: 'inline-flex',
@@ -551,7 +558,7 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'flex-end' }}>
                       <EventCover event={event} />
                     </div>
                   </div>
@@ -567,6 +574,7 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
 
 export default function BrowseEventsPageClient() {
   const { user, loading: authLoading } = useAuth();
+  const isMobile = useMedia('(max-width: 768px)', false);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [activeTab, setActiveTab] = useState<EventsTab>('upcoming');
   const [mode, setMode] = useState<EventsMode>('personal');
@@ -697,13 +705,14 @@ export default function BrowseEventsPageClient() {
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'flex-end',
+              alignItems: isMobile ? 'stretch' : 'flex-end',
+              flexDirection: isMobile ? 'column' : 'row',
               gap: '12px',
               flexWrap: 'wrap',
             }}
           >
-            <div style={{ display: 'grid', gap: '8px' }}>
-              <div className="eyebrow" style={{ width: 'fit-content', padding: '8px 12px', fontSize: '0.8rem' }}>
+            <div style={{ display: 'grid', gap: '8px', width: isMobile ? '100%' : 'auto' }}>
+              <div className="eyebrow" style={{ width: 'fit-content', padding: '8px 12px', fontSize: isMobile ? '0.74rem' : '0.8rem' }}>
                 <CalendarDays size={14} />
                 {mode === 'personal' ? 'Your timeline' : 'Event timeline'}
               </div>
@@ -734,11 +743,11 @@ export default function BrowseEventsPageClient() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
               <Link
                 href={routes.createEvent}
                 className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition"
-                style={{ background: 'var(--primary-color)' }}
+                style={{ background: 'var(--primary-color)', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}
               >
                 <Plus size={16} />
                 Create Event
@@ -751,6 +760,7 @@ export default function BrowseEventsPageClient() {
                   border: '1px solid var(--border-color)',
                   display: 'inline-flex',
                   boxShadow: 'var(--events-shadow-panel)',
+                  width: isMobile ? '100%' : 'auto',
                 }}
               >
                 {(['upcoming', 'past'] as const).map((tab) => {
@@ -768,6 +778,7 @@ export default function BrowseEventsPageClient() {
                         fontWeight: 700,
                         cursor: 'pointer',
                         fontSize: '0.84rem',
+                        flex: isMobile ? 1 : 'initial',
                         boxShadow: active ? '0 12px 24px rgba(14,118,120,0.22)' : 'none',
                         transition: 'all 0.2s ease',
                       }}

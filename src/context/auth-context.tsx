@@ -142,22 +142,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(session.accessToken ?? null);
       setRefreshTokenState(session.refreshToken ?? null);
       setIsLoading(false);
-    } else {
-      // Check legacy local storage fallback if needed, but primarily rely on next-auth
-      const storage = activeStorage();
-      const storedAccessToken = storage.getItem('access_token');
-      
-      if (!storedAccessToken) {
-        setUser(null);
-        setAccessToken(null);
-        setRefreshTokenState(null);
       } else {
+        // Check legacy local storage fallback if needed, but primarily rely on next-auth
+        const storage = activeStorage();
+        const storedAccessToken = storage.getItem('access_token');
+
+        if (!storedAccessToken) {
+          setUser(null);
+          setAccessToken(null);
+          setRefreshTokenState(null);
+        } else {
         // Hydrate from legacy storage so the session continues working even if next-auth fails the client fetch
         setAccessToken(storedAccessToken);
         setRefreshTokenState(storage.getItem('refresh_token'));
         try {
           const storedUser = storage.getItem('user');
-          if (storedUser) setUser(JSON.parse(storedUser));
+          if (storedUser) {
+            setUser(JSON.parse(storedUser) as User);
+          }
         } catch (err) {
           // Ignore parsing errors
         }

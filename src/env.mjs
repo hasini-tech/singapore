@@ -1,26 +1,12 @@
 import { z } from 'zod';
 import { createEnv } from '@t3-oss/env-nextjs';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 export const env = createEnv({
   /*
    * ServerSide Environment variables, not available on the client.
    */
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
-    NEXTAUTH_SECRET: isProduction
-      ? z.string().min(1)
-      : z.preprocess(
-          (value) => (value === '' ? undefined : value),
-          z.string().min(1).optional()
-        ),
-    NEXTAUTH_URL: isProduction
-      ? z.string().url()
-      : z.preprocess(
-          (value) => (value === '' ? undefined : value),
-          z.string().url().default('http://localhost:3000')
-        ),
 
     // email
     SMTP_HOST: z.string().optional(),

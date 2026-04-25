@@ -178,12 +178,29 @@ function getConfiguredOAuthProviders(): AuthProvider[] {
   return providers;
 }
 
+function getResolvedNextAuthUrl() {
+  const explicitUrl = process.env.NEXTAUTH_URL?.trim();
+  if (explicitUrl) {
+    return explicitUrl;
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+
+  return 'http://localhost:3000';
+}
+
 const oauthProviders = getConfiguredOAuthProviders();
 const nextAuthSecret = getNextAuthSecret();
+const nextAuthUrl = getResolvedNextAuthUrl();
+
 if (!process.env.NEXTAUTH_URL) {
-  process.env.NEXTAUTH_URL = env.NEXTAUTH_URL;
+  process.env.NEXTAUTH_URL = nextAuthUrl;
 }
-const authProxyBaseUrl = new URL('/api/users', env.NEXTAUTH_URL).toString();
+
+const authProxyBaseUrl = new URL('/api/users', nextAuthUrl).toString();
 
 export const authOptions: NextAuthOptions = {
   secret: nextAuthSecret,
