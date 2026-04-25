@@ -63,7 +63,7 @@ export default function CreateCalendarPage() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <PageHeader
         title="Create Calendar"
         breadcrumb={[
@@ -73,7 +73,7 @@ export default function CreateCalendarPage() {
         ]}
       />
 
-      <div className="mx-auto mt-6 max-w-3xl rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mx-auto mt-6 max-w-3xl rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-slate-900">Calendar Name</label>
@@ -155,7 +155,7 @@ export default function CreateCalendarPage() {
             <button
               type="submit"
               disabled={!canSubmit || saving}
-              className="inline-flex items-center justify-center rounded-3xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center rounded-3xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {saving ? 'Creating...' : 'Create calendar'}
             </button>

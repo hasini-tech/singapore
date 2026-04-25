@@ -562,6 +562,13 @@ select:-webkit-autofill:focus {
   backdrop-filter: blur(18px);
 }
 
+.evently-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -636,6 +643,11 @@ body.hide-nav main.flex.min-h-screen.flex-grow > div > div {
 @media (max-width: 767px) {
   .page-shell {
     width: min(1180px, calc(100% - 20px));
+  }
+
+  .events-page .primary-button,
+  .events-page .secondary-button {
+    width: 100%;
   }
 }
 

@@ -1,0 +1,23 @@
+
+> iso@7.6.2 dev
+> next dev --port 3105
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3105
+   - Network:      http://192.168.1.58:3105
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 16.9s
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 77.6s (532 modules)
+ GET /api/auth/session 200 in 1414ms
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3105
+   - Network:      http://192.168.1.58:3105
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 11.5s
+   Reload env: .env
+   Reload env: .env

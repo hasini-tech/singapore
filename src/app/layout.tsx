@@ -27,7 +27,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  let session = null;
+
+  try {
+    session = await getServerSession(authOptions);
+  } catch (error) {
+    console.error('Failed to resolve server session in RootLayout:', error);
+  }
 
   return (
     <html
@@ -41,7 +47,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={cn(inter.variable, lexendDeca.variable, 'font-inter')}
       >
-        <NextAuthProvider session={session || null}>
+        <NextAuthProvider session={session}>
           <AuthProvider>
             <ThemeProvider>
               <NextProgress />

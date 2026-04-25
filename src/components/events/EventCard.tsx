@@ -5,21 +5,27 @@ import Link from 'next/link';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
+import { useMedia } from '@/hooks/use-media';
 
 interface EventProps {
   event: any;
 }
 
 export default function EventCard({ event }: EventProps) {
+  const isMobile = useMedia('(max-width: 768px)', false);
   const eventDate = new Date(event.date);
   const formattedDate = format(eventDate, 'MMM d, yyyy');
 
   return (
-    <Link href={`/events/${event.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+    <Link
+      href={`/events/${event.slug}`}
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+    >
       <div
         style={{
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,251,251,0.96))',
-          borderRadius: '24px',
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,251,251,0.96))',
+          borderRadius: isMobile ? '20px' : '24px',
           overflow: 'hidden',
           border: '1px solid var(--border-color)',
           transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
@@ -43,7 +49,7 @@ export default function EventCard({ event }: EventProps) {
         <div
           style={{
             width: '100%',
-            height: '170px',
+            height: isMobile ? '190px' : '170px',
             backgroundColor: 'var(--teal-050)',
             position: 'relative',
             overflow: 'hidden',
@@ -52,17 +58,24 @@ export default function EventCard({ event }: EventProps) {
           <img
             src={event.cover_image || DEFAULT_EVENT_COVER}
             alt={event.title}
+            className="evently-image"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 35%, rgba(17,39,45,0.12) 100%)' }} />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, transparent 35%, rgba(17,39,45,0.12) 100%)',
+            }}
+          />
           <div style={{ position: 'absolute', top: '14px', right: '14px' }}>
             <div
               style={{
                 background: 'rgba(255,255,255,0.95)',
                 backdropFilter: 'blur(10px)',
-                padding: '6px 10px',
+                padding: isMobile ? '6px 9px' : '6px 10px',
                 borderRadius: '999px',
-                fontSize: '11px',
+                fontSize: isMobile ? '10px' : '11px',
                 fontWeight: 800,
                 color: 'var(--primary-color)',
                 border: '1px solid var(--border-color)',
@@ -73,19 +86,27 @@ export default function EventCard({ event }: EventProps) {
           </div>
         </div>
 
-        <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div
+          style={{
+            padding: isMobile ? '16px' : '18px',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+          }}
+        >
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
               alignSelf: 'flex-start',
-              padding: '7px 11px',
+              padding: isMobile ? '6px 10px' : '7px 11px',
               borderRadius: '999px',
               background: 'var(--primary-soft)',
               color: 'var(--primary-color)',
               fontWeight: 800,
-              fontSize: '0.72rem',
+              fontSize: isMobile ? '0.68rem' : '0.72rem',
               marginBottom: '12px',
             }}
           >
@@ -94,11 +115,12 @@ export default function EventCard({ event }: EventProps) {
 
           <h3
             style={{
-              fontSize: '1.18rem',
+              fontSize: isMobile ? '1.05rem' : '1.18rem',
               fontWeight: 800,
               marginBottom: '12px',
               color: 'var(--text-primary)',
               letterSpacing: '-0.02em',
+              lineHeight: 1.25,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -108,22 +130,30 @@ export default function EventCard({ event }: EventProps) {
             {event.title}
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              marginTop: 'auto',
+              minWidth: 0,
+            }}
+          >
             <div style={metaRowStyle}>
               <Calendar size={15} strokeWidth={2} color="var(--primary-color)" />
-              <span>
-                {formattedDate} · {event.time}
+              <span style={metaTextStyle}>
+                {formattedDate} | {event.time || 'Time TBA'}
               </span>
             </div>
             <div style={metaRowStyle}>
               <MapPin size={15} strokeWidth={2} color="var(--primary-color)" />
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={isMobile ? metaTextStyle : metaTextClampStyle}>
                 {event.is_online ? 'Online event' : event.location || 'Location TBA'}
               </span>
             </div>
             <div style={metaRowStyle}>
               <Users size={15} strokeWidth={2} color="var(--primary-color)" />
-              <span>
+              <span style={metaTextStyle}>
                 {event.max_seats === 0 ? 'Unlimited capacity' : `${event.seats_left} seats left`}
               </span>
             </div>
@@ -136,9 +166,23 @@ export default function EventCard({ event }: EventProps) {
 
 const metaRowStyle: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '8px',
   color: 'var(--text-secondary)',
   fontSize: '0.88rem',
   fontWeight: 600,
+  minWidth: 0,
+  lineHeight: 1.45,
+};
+
+const metaTextStyle: React.CSSProperties = {
+  minWidth: 0,
+  overflowWrap: 'anywhere',
+};
+
+const metaTextClampStyle: React.CSSProperties = {
+  ...metaTextStyle,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 };

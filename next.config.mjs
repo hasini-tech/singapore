@@ -3,6 +3,7 @@ import path from 'node:path';
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
+  distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
   images: {
     remotePatterns: [
       {
@@ -56,7 +57,7 @@ const nextConfig = {
     ],
   },
   reactStrictMode: true,
-  output: 'standalone',
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   outputFileTracingRoot: process.cwd(),
   transpilePackages: ['core'],
   webpack: (config) => {

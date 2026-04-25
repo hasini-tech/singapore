@@ -31,6 +31,7 @@ import { useAuth } from '@/context/auth-context';
 import api from '@/lib/api';
 import { routes } from '@/config/routes';
 import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
+import { useMedia } from '@/hooks/use-media';
 
 type OwnerCalendar = {
   id: string;
@@ -245,6 +246,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 export default function CalendarDetailPageClient({ slug }: { slug: string }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const isMobile = useMedia('(max-width: 900px)', false);
   const [calendar, setCalendar] = useState<OwnerCalendar | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -579,18 +581,36 @@ export default function CalendarDetailPageClient({ slug }: { slug: string }) {
 
   if (error || !calendar) {
     return (
-      <main style={calendarPageShellStyle}>
+      <main
+        style={{
+          ...calendarPageShellStyle,
+          padding: isMobile ? '20px 16px 72px' : calendarPageShellStyle.padding,
+        }}
+      >
         <ErrorState message={error || 'This calendar could not be loaded.'} />
       </main>
     );
   }
 
   return (
-    <main style={calendarPageShellStyle}>
+    <main
+      style={{
+        ...calendarPageShellStyle,
+        padding: isMobile ? '20px 16px 72px' : calendarPageShellStyle.padding,
+      }}
+    >
       <CalendarHeader calendar={calendar} />
 
       <section style={{ borderBottom: '1px solid rgba(148,163,184,0.22)', marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: isMobile ? 14 : 18,
+            flexWrap: isMobile ? 'nowrap' : 'wrap',
+            overflowX: isMobile ? 'auto' : 'visible',
+            paddingBottom: isMobile ? 6 : 0,
+          }}
+        >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -609,6 +629,8 @@ export default function CalendarDetailPageClient({ slug }: { slug: string }) {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 8,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 {tab.label}
@@ -756,35 +778,54 @@ function ErrorState({ message }: { message: string }) {
 }
 
 function CalendarHeader({ calendar }: { calendar: OwnerCalendar }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
+
   return (
     <section style={{ marginBottom: 28 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 18 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: isMobile ? 14 : 16,
+          marginBottom: 18,
+        }}
+      >
         <div
           style={{
-            width: 64,
-            height: 64,
-            borderRadius: 22,
+            width: isMobile ? 56 : 64,
+            height: isMobile ? 56 : 64,
+            borderRadius: isMobile ? 18 : 22,
             background: buildCalendarGradient(calendar.tint_color),
             color: '#fff',
             display: 'grid',
             placeItems: 'center',
-            fontSize: '1.3rem',
+            fontSize: isMobile ? '1.1rem' : '1.3rem',
             fontWeight: 800,
             boxShadow: '0 18px 34px rgba(17,39,45,0.1)',
+            flexShrink: 0,
           }}
         >
           {(calendar.name || 'C').slice(0, 1).toUpperCase()}
         </div>
-        <div>
-          <h1 style={{ fontSize: '3rem', fontWeight: 800, letterSpacing: '-0.04em', margin: 0 }}>
+        <div style={{ minWidth: 0 }}>
+          <h1
+            style={{
+              fontSize: isMobile ? 'clamp(1.9rem, 9vw, 2.5rem)' : '3rem',
+              fontWeight: 800,
+              letterSpacing: '-0.04em',
+              margin: 0,
+              lineHeight: 1,
+              overflowWrap: 'anywhere',
+            }}
+          >
             {calendar.name}
           </h1>
           <div
             style={{
               marginTop: 8,
               display: 'flex',
-              alignItems: 'center',
-              gap: 16,
+              alignItems: 'flex-start',
+              gap: isMobile ? 12 : 16,
               color: '#6b7280',
               flexWrap: 'wrap',
             }}
@@ -801,7 +842,15 @@ function CalendarHeader({ calendar }: { calendar: OwnerCalendar }) {
           </div>
         </div>
       </div>
-      <p style={{ margin: 0, color: '#6b7280', maxWidth: 760, lineHeight: 1.7 }}>
+      <p
+        style={{
+          margin: 0,
+          color: '#6b7280',
+          maxWidth: 760,
+          lineHeight: 1.7,
+          fontSize: isMobile ? '0.95rem' : '1rem',
+        }}
+      >
         {calendar.description || 'This calendar collects the events hosted under this owner calendar.'}
       </p>
     </section>
@@ -819,19 +868,21 @@ function EventsTab({
   timelineFilter: 'upcoming' | 'past';
   onTimelineFilterChange: (value: 'upcoming' | 'past') => void;
 }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
+
   return (
     <section style={{ display: 'grid', gap: 22 }}>
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: isMobile ? 'stretch' : 'center',
           gap: 18,
           flexWrap: 'wrap',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <h2 style={{ fontSize: '2rem', margin: 0, fontWeight: 800 }}>Events</h2>
+          <h2 style={{ fontSize: isMobile ? '1.65rem' : '2rem', margin: 0, fontWeight: 800 }}>Events</h2>
           <Link
             href={`/create-event?calendar=${calendar.id}`}
             style={{
@@ -850,11 +901,26 @@ function EventsTab({
             <Plus size={16} />
           </Link>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+            width: isMobile ? '100%' : 'auto',
+          }}
+        >
           <Link
             href={routes.events}
             className="secondary-button"
-            style={{ minHeight: 40, paddingInline: 14, borderRadius: 12, textDecoration: 'none' }}
+            style={{
+              minHeight: 40,
+              paddingInline: 14,
+              borderRadius: 12,
+              textDecoration: 'none',
+              width: isMobile ? '100%' : 'auto',
+              justifyContent: 'center',
+            }}
           >
             Browse Events
           </Link>
@@ -865,6 +931,7 @@ function EventsTab({
               borderRadius: 14,
               background: '#f3f4f6',
               border: '1px solid rgba(148,163,184,0.18)',
+              width: isMobile ? '100%' : 'auto',
             }}
           >
             {(['upcoming', 'past'] as const).map((value) => {
@@ -884,6 +951,7 @@ function EventsTab({
                     cursor: 'pointer',
                     boxShadow: isActive ? '0 8px 18px rgba(17,39,45,0.08)' : 'none',
                     textTransform: 'capitalize',
+                    flex: isMobile ? 1 : 'initial',
                   }}
                 >
                   {value}
@@ -910,7 +978,7 @@ function EventsTab({
         <div style={{ display: 'grid', gap: 26 }}>
           {groupedEvents.map((group) => (
             <div key={group.date.toISOString()} style={{ display: 'grid', gap: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '140px 1fr', gap: 18 }}>
                 <div style={{ paddingTop: 6 }}>
                   <div
                     style={{
@@ -932,12 +1000,18 @@ function EventsTab({
                       <div
                         style={{
                           display: 'grid',
-                          gridTemplateColumns: '44px 1fr',
+                          gridTemplateColumns: isMobile ? '1fr' : '44px 1fr',
                           gap: 14,
                           alignItems: 'stretch',
                         }}
                       >
-                        <div style={{ display: 'grid', justifyItems: 'center', paddingTop: 12 }}>
+                        <div
+                          style={{
+                            display: isMobile ? 'none' : 'grid',
+                            justifyItems: 'center',
+                            paddingTop: 12,
+                          }}
+                        >
                           <div
                             style={{
                               width: 8,
@@ -958,16 +1032,16 @@ function EventsTab({
                         <div
                           style={{
                             display: 'grid',
-                            gridTemplateColumns: 'minmax(0, 1fr) 112px',
+                            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 112px',
                             gap: 18,
-                            padding: 20,
-                            borderRadius: 24,
+                            padding: isMobile ? 16 : 20,
+                            borderRadius: isMobile ? 20 : 24,
                             background: '#fff',
                             border: '1px solid rgba(148,163,184,0.16)',
                             boxShadow: '0 14px 36px rgba(17,39,45,0.05)',
                           }}
                         >
-                          <div>
+                          <div style={{ minWidth: 0 }}>
                             <div style={{ color: '#9ca3af', fontSize: '1.05rem', marginBottom: 8 }}>
                               {event.time ||
                                 new Date(event.date).toLocaleTimeString('en-IN', {
@@ -977,10 +1051,11 @@ function EventsTab({
                             </div>
                             <div
                               style={{
-                                fontSize: '1.5rem',
+                                fontSize: isMobile ? '1.2rem' : '1.5rem',
                                 fontWeight: 800,
                                 color: '#111827',
                                 marginBottom: 8,
+                                lineHeight: 1.2,
                               }}
                             >
                               {event.title}
@@ -1023,8 +1098,8 @@ function EventsTab({
                           <div
                             style={{
                               alignSelf: 'center',
-                              width: 112,
-                              height: 112,
+                              width: isMobile ? '100%' : 112,
+                              height: isMobile ? 180 : 112,
                               borderRadius: 18,
                               overflow: 'hidden',
                               background: '#f3f4f6',
@@ -1033,6 +1108,7 @@ function EventsTab({
                             <img
                               src={event.cover_image || DEFAULT_EVENT_COVER}
                               alt={event.title}
+                              className="evently-image"
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           </div>
@@ -1085,6 +1161,8 @@ function PeopleTab({
   onAddPerson: () => void;
   onDownload: () => void;
 }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
+
   return (
     <section style={{ display: 'grid', gap: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -1105,7 +1183,7 @@ function PeopleTab({
           <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: 12 }}>
             Add someone to this calendar
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr auto', gap: 12 }}>
             <input
               value={inviteName}
               onChange={(event) => onInviteNameChange(event.target.value)}
@@ -1173,7 +1251,17 @@ function PeopleTab({
                 <div>
                   <div style={{ fontWeight: 700, color: '#111827' }}>
                     {person.name}
-                    <span style={{ color: '#94a3b8', fontWeight: 500 }}> {person.email}</span>
+                    <span
+                      style={{
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        display: isMobile ? 'block' : 'inline',
+                        marginTop: isMobile ? 2 : 0,
+                        overflowWrap: 'anywhere',
+                      }}
+                    >
+                      {isMobile ? person.email : ` ${person.email}`}
+                    </span>
                   </div>
                   <div style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: 2 }}>
                     {person.kind === 'owner' ? 'Calendar owner' : 'Added to this calendar'}
@@ -1348,6 +1436,8 @@ function PaymentTab({
   onToggleCoupon: (couponId: string) => void;
   onDeleteCoupon: (couponId: string) => void;
 }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
+
   return (
     <section style={{ display: 'grid', gap: 28 }}>
       <div>
@@ -1392,7 +1482,7 @@ function PaymentTab({
 
         {showCouponForm && (
           <div style={{ ...panelStyle, marginBottom: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px auto', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 140px 140px auto', gap: 12 }}>
               <input
                 value={couponCode}
                 onChange={(event) => onCouponCodeChange(event.target.value)}
@@ -1519,6 +1609,7 @@ function SettingsTab({
   onOpenCreateCalendar: () => void;
   onSave: () => void;
 }) {
+  const isMobile = useMedia('(max-width: 900px)', false);
   const [activeSection, setActiveSection] = useState<SettingsSection>('display');
   const [eventVisibility, setEventVisibility] = useState<'public' | 'private'>('public');
   const [publicGuestList, setPublicGuestList] = useState(true);
@@ -1710,7 +1801,7 @@ function SettingsTab({
           <div style={{ color: '#64748b', maxWidth: 420, margin: '0 auto 18px' }}>
             Your team calendar lets you easily manage, share, and curate your events.
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 18 }}>
             <FeatureMini title="Manage with your team" />
             <FeatureMini title="Create a public calendar page" />
             <FeatureMini title="Curate community events" />
@@ -1730,7 +1821,7 @@ function SettingsTab({
             <div style={{ color: '#64748b', marginBottom: 18 }}>
               Organize this calendar with tags so people can understand what it is about.
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: 12 }}>
               <input
                 value={tagInput}
                 onChange={(event) => setTagInput(event.target.value)}
@@ -1837,7 +1928,7 @@ function SettingsTab({
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 14, alignItems: 'end', marginTop: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: 14, alignItems: 'end', marginTop: 24 }}>
               <div>
                 <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Used</div>
                 <div style={{ fontSize: '2rem', fontWeight: 800, color: '#111827' }}>0</div>
@@ -1909,8 +2000,16 @@ function SettingsTab({
   }
 
   return (
-    <section style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 20 }}>
-      <aside style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
+    <section style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '160px 1fr', gap: 20 }}>
+      <aside
+        style={{
+          display: isMobile ? 'flex' : 'grid',
+          gap: 16,
+          alignContent: 'start',
+          overflowX: isMobile ? 'auto' : 'visible',
+          paddingBottom: isMobile ? 6 : 0,
+        }}
+      >
         {SETTINGS_SECTIONS.map((item) => {
           const isActive = activeSection === item.id;
           return (
@@ -1930,6 +2029,8 @@ function SettingsTab({
                 alignItems: 'center',
                 gap: 10,
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {item.label}
@@ -2082,6 +2183,7 @@ const shellInputStyle: React.CSSProperties = {
 
 const selectStyle: React.CSSProperties = {
   minHeight: 40,
+  width: '100%',
   borderRadius: 10,
   border: '1px solid rgba(148,163,184,0.18)',
   background: '#fff',
@@ -2095,7 +2197,8 @@ const listRowStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   gap: 16,
-  alignItems: 'center',
+  alignItems: 'flex-start',
+  flexWrap: 'wrap',
   padding: '14px 16px',
   borderRadius: 18,
   background: '#fff',
@@ -2175,8 +2278,9 @@ const tagButtonStyle: React.CSSProperties = {
 
 const metaRowStyle: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: 8,
+  lineHeight: 1.45,
 };
 
 const insightsGridStyle: React.CSSProperties = {
@@ -2195,7 +2299,8 @@ const settingsRowStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   gap: 16,
-  alignItems: 'center',
+  alignItems: 'flex-start',
+  flexWrap: 'wrap',
   padding: '14px 16px',
   borderBottom: '1px solid rgba(148,163,184,0.18)',
 };

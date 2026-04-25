@@ -52,6 +52,7 @@ import Facebook from "@/components/icons/facebook";
 import Linkedin from "@/components/icons/linkedin";
 import Twitter from "@/components/icons/twitter";
 import { useAuth } from "@/context/auth-context";
+import { useMedia } from "@/hooks/use-media";
 import api from "@/lib/api";
 import { DEFAULT_EVENT_COVER } from "@/lib/defaults";
 import { routes } from "@/config/routes";
@@ -171,6 +172,8 @@ export default function ManageEventPage() {
   const params = useParams();
   const slug = params?.slug as string;
   const { user, loading: authLoading } = useAuth();
+  const isMobile = useMedia("(max-width: 900px)", false);
+  const isCompact = useMedia("(max-width: 640px)", false);
 
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["key"]>("overview");
   const [event, setEvent] = useState<EventRecord | null>(null);
@@ -337,26 +340,34 @@ export default function ManageEventPage() {
 
   return (
     <PageShell>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "34px 18px 72px" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "20px 14px 56px" : "34px 18px 72px" }}>
         <div
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: "18px",
+            gap: isMobile ? "12px" : "18px",
             alignItems: "center",
             justifyContent: "space-between",
             marginBottom: "24px",
-            padding: "14px 18px",
-            borderRadius: "24px",
+            padding: isMobile ? "12px 14px" : "14px 18px",
+            borderRadius: isMobile ? "18px" : "24px",
             background: "rgba(255,255,255,0.96)",
             border: "1px solid rgba(15,23,42,0.08)",
             backdropFilter: "blur(16px)",
             position: "sticky",
-            top: 16,
+            top: isMobile ? 10 : 16,
             zIndex: 20,
           }}
         >
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "18px", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: isMobile ? "12px" : "18px",
+              alignItems: "center",
+              width: isMobile ? "100%" : "auto",
+            }}
+          >
             <Link href={routes.events} style={topNavActiveLinkStyle}>
               Events
             </Link>
@@ -368,7 +379,7 @@ export default function ManageEventPage() {
             </Link>
           </div>
 
-          <Link href={createEventHref} style={topCreateEventButtonStyle}>
+          <Link href={createEventHref} style={isMobile ? { ...topCreateEventButtonStyle, width: "100%", justifyContent: "center" } : topCreateEventButtonStyle}>
             <Plus size={14} />
             Create Event
           </Link>
@@ -385,13 +396,13 @@ export default function ManageEventPage() {
             <ArrowLeft size={14} />
             <span style={{ fontWeight: 600 }}>Personal</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-            <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: 0, letterSpacing: "-0.04em" }}>{event.title}</h1>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-end", gap: isMobile ? 14 : 24 }}>
+            <h1 style={{ fontSize: isMobile ? "2rem" : "2.6rem", fontWeight: 800, margin: 0, letterSpacing: "-0.04em", overflowWrap: "anywhere" }}>{event.title}</h1>
             <a 
               href={`/events/${event.slug}`} 
               target="_blank" 
               rel="noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: 10, background: "var(--manage-hover)", color: "var(--manage-fg)", fontWeight: 700, fontSize: "0.88rem", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? "100%" : "auto", padding: "9px 12px", borderRadius: 10, background: "var(--manage-hover)", color: "var(--manage-fg)", fontWeight: 700, fontSize: "0.88rem", textDecoration: "none" }}
             >
               Event Page <ExternalLink size={14} />
             </a>
@@ -418,7 +429,7 @@ export default function ManageEventPage() {
                  </div>
                )}
 
-               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+               <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
                  {/* Event Recap */}
                  <div style={{ padding: 24, background: "var(--manage-card)", borderRadius: 16, border: "1px solid #f1f1f1", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
@@ -459,15 +470,15 @@ export default function ManageEventPage() {
 
                {/* Invitations */}
                <div>
-                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                 <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "baseline", gap: 12, marginBottom: 4 }}>
                    <h3 style={{ fontSize: "1.45rem", fontWeight: 800, margin: 0 }}>Invitations</h3>
-                   <button onClick={() => setInviteOpen(true)} style={{ background: "none", color: "var(--manage-muted)", border: "none", fontWeight: 600, fontSize: "0.9rem", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                   <button onClick={() => setInviteOpen(true)} style={{ background: "none", color: "var(--manage-muted)", border: "none", fontWeight: 600, fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: isMobile ? "center" : "flex-start", gap: 6, cursor: "pointer", padding: 0 }}>
                      <Plus size={16} /> Invite Guests
                    </button>
                  </div>
                  <p style={{ color: "var(--manage-muted)", fontSize: "0.95rem", marginTop: 8, marginBottom: 24 }}>Invite subscribers, contacts and past guests via email or SMS.</p>
                  
-                 <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 20 }}>
+                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 2fr", gap: 20 }}>
                    <div style={{ padding: 24, background: "var(--manage-card)", borderRadius: 16, border: "1px solid #f1f1f1", boxShadow: "0 4px 12px rgba(0,0,0,0.02)", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative" }}>
                       <ExternalLink size={14} color="#ccc" style={{ position: "absolute", top: 20, right: 20 }} />
                       <div>
@@ -502,9 +513,9 @@ export default function ManageEventPage() {
                               <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--manage-hover)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${g.user_email}`} alt="avatar" style={{width: 32, height: 32, borderRadius: "50%"}} />
                               </div>
-                              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                              <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "baseline", gap: 8, minWidth: 0 }}>
                                 <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{g.user_name || "Guest"}</span>
-                                <span style={{ fontSize: "0.85rem", color: "var(--manage-muted)" }}>{g.user_email}</span>
+                                <span style={{ fontSize: "0.85rem", color: "var(--manage-muted)", overflowWrap: "anywhere" }}>{g.user_email}</span>
                               </div>
                             </div>
                           ))}
@@ -525,7 +536,7 @@ export default function ManageEventPage() {
                 <div style={{ color: "#bbb", fontSize: "1.8rem", fontWeight: 800, marginBottom: 20 }}>0 Going</div>
                 <div style={{ height: 4, background: "#eee", borderRadius: 2, marginBottom: 32 }} />
                 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
                   <div onClick={() => setInviteOpen(true)} style={quickActionCardSmall}>
                     <div style={{ ...iconCircleSmall, background: "rgba(0, 102, 255, 0.08)", color: "#0066FF" }}><Users size={16} /></div>
                     <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>Invite Guests</span>
@@ -543,9 +554,9 @@ export default function ManageEventPage() {
 
               {/* Guest List Display */}
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 24 }}>
                   <h3 style={{ fontSize: "1.45rem", fontWeight: 800, margin: 0 }}>Guest List</h3>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button style={tinyBtn}><UserPlus size={16} /></button>
                     <button style={tinyBtn}><List size={16} /></button>
                     <button style={tinyBtn}><Download size={16} /></button>
@@ -564,7 +575,7 @@ export default function ManageEventPage() {
                   <Card style={{ padding: 0 }}>
                     <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                       {guests.map((g, i) => (
-                        <li key={i} style={{ padding: "16px 24px", borderBottom: i === guests.length - 1 ? "none" : "1px solid #f5f5f5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <li key={i} style={{ padding: isMobile ? "16px" : "16px 24px", borderBottom: i === guests.length - 1 ? "none" : "1px solid #f5f5f5", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                             <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--manage-hover)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <User size={18} color="var(--manage-muted)" />
@@ -574,7 +585,7 @@ export default function ManageEventPage() {
                                <div style={{ fontSize: "0.85rem", color: "var(--manage-muted)" }}>{g.user_email}</div>
                             </div>
                           </div>
-                          <span style={{ fontSize: "0.72rem", padding: "4px 10px", borderRadius: 99, background: g.status === 'confirmed' ? "rgba(34, 197, 94, 0.1)" : "var(--manage-hover)", color: g.status === 'confirmed' ? "#16a34a" : "var(--manage-muted)", fontWeight: 800 }}>{g.status}</span>
+                          <span style={{ alignSelf: isMobile ? "flex-start" : "auto", fontSize: "0.72rem", padding: "4px 10px", borderRadius: 99, background: g.status === 'confirmed' ? "rgba(34, 197, 94, 0.1)" : "var(--manage-hover)", color: g.status === 'confirmed' ? "#16a34a" : "var(--manage-muted)", fontWeight: 800 }}>{g.status}</span>
                         </li>
                       ))}
                     </ul>
@@ -586,7 +597,7 @@ export default function ManageEventPage() {
 
           {activeTab === "registration" && (
             <div style={{ display: "grid", gap: 32 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
                 <div style={quickActionCardSmall}>
                   <div style={{ ...iconCircleSmall, background: "rgba(34, 197, 94, 0.08)", color: "#16a34a" }}><Layout size={16} /></div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
@@ -611,23 +622,23 @@ export default function ManageEventPage() {
               </div>
 
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 16 }}>
                   <h3 style={{ fontSize: "1.45rem", fontWeight: 800, margin: 0 }}>Tickets</h3>
-                  <button style={{ ...pillBtn, background: "var(--manage-hover)", color: "var(--manage-fg)", border: "none", boxShadow: "none", borderRadius: 10, padding: "8px 12px", fontSize: "0.9rem" }}>
+                  <button style={{ ...pillBtn, background: "var(--manage-hover)", color: "var(--manage-fg)", border: "none", boxShadow: "none", borderRadius: 10, padding: "8px 12px", fontSize: "0.9rem", width: isMobile ? "100%" : "auto", justifyContent: "center" }}>
                     <Plus size={16} /> New Ticket Type
                   </button>
                 </div>
-                <div style={{ marginBottom: 20, padding: 20, background: "var(--manage-card)", borderRadius: 20, border: "1px solid #f1f1f1", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center" }}>
+                <div style={{ marginBottom: 20, padding: 20, background: "var(--manage-card)", borderRadius: 20, border: "1px solid #f1f1f1", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "auto 1fr auto", gap: 16, alignItems: "center" }}>
                    <div style={{ width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, #000, #333)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--manage-card)" }}>
                       <Zap size={24} />
                    </div>
                    <div>
                       <div style={{ fontWeight: 800, fontSize: "1.02rem" }}>Start Selling. <span style={{ fontWeight: 500, color: "var(--manage-muted)" }}>Connect Stripe to accept payments and receive payouts.</span></div>
                    </div>
-                   <button style={{ ...actionPrimary, padding: "10px 18px", borderRadius: 12 }}>Get Started</button>
+                   <button style={{ ...actionPrimary, padding: "10px 18px", borderRadius: 12, width: isMobile ? "100%" : "auto", justifyContent: "center" }}>Get Started</button>
                 </div>
-                <div style={{ padding: "16px 20px", background: "var(--manage-card)", borderRadius: 16, border: "1px solid #f1f1f1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700 }}>
+                <div style={{ padding: "16px 20px", background: "var(--manage-card)", borderRadius: 16, border: "1px solid #f1f1f1", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 12 }}>
+                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, flexWrap: "wrap" }}>
                       Standard <span style={{ color: "var(--manage-muted)", fontWeight: 500 }}>Free</span>
                    </div>
                    <div style={{ color: "var(--manage-muted)", display: "flex", alignItems: "center", gap: 6, fontSize: "0.9rem" }}>
@@ -649,7 +660,7 @@ export default function ManageEventPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, marginBottom: 12, color: "#16a34a" }}>
                          <UserCheck size={18} /> Personal Information
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 12 }}>
                          <div style={questionBox}><User size={14} /> Name <span style={{ marginLeft: "auto", color: "#ccc" }}>Full Name</span></div>
                          <div style={questionBox}><Mail size={14} /> Email <span style={{ marginLeft: "auto", color: "#16a34a" }}>Required</span></div>
                          <div style={questionBox}><Phone size={14} /> Phone <span style={{ marginLeft: "auto", color: "var(--manage-muted)" }}>Off</span></div>
@@ -659,7 +670,7 @@ export default function ManageEventPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, marginBottom: 12, color: "#9333ea" }}>
                          <Wallet size={18} /> Web3 Identity
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 12 }}>
                          <div style={questionBox}>ETH Address <span style={{ marginLeft: "auto", color: "var(--manage-muted)" }}>Off</span></div>
                          <div style={questionBox}>SOL Address <span style={{ marginLeft: "auto", color: "var(--manage-muted)" }}>Off</span></div>
                       </div>
@@ -671,13 +682,13 @@ export default function ManageEventPage() {
 
           {activeTab === "blasts" && (
             <div style={{ display: "grid", gap: 32 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", background: "var(--manage-card)", borderRadius: 20, border: "1px solid #f1f1f1" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", background: "var(--manage-card)", borderRadius: 20, border: "1px solid #f1f1f1", flexWrap: "wrap" }}>
                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--manage-hover)", overflow: "hidden" }}>
                    {user?.profile_image ? <img src={user.profile_image} alt="" style={{ width: "100%", height: "100%" }} /> : <User size={20} style={{ transform: "translate(6px, 6px)" }} />}
                  </div>
                  <span style={{ color: "#bbb", fontWeight: 600 }}>Send a blast to your guests...</span>
               </div>
-              <div style={{ padding: "48px 32px", borderRadius: 24, background: "var(--manage-card)", border: "1px dashed #ddd", display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "center" }}>
+              <div style={{ padding: isMobile ? "28px 20px" : "48px 32px", borderRadius: 24, background: "var(--manage-card)", border: "1px dashed #ddd", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto", gap: 40, alignItems: "center" }}>
                  <div>
                     <h3 style={{ fontSize: "1.2rem", fontWeight: 800, margin: "0 0 10px" }}>Send Blasts</h3>
                     <p style={{ color: "var(--manage-muted)", fontSize: "1rem", lineHeight: 1.5, maxWidth: 360, margin: 0 }}>Share updates with your guests via email, SMS, and push notifications.</p>
@@ -718,9 +729,9 @@ export default function ManageEventPage() {
           {activeTab === "insights" && (
             <div style={{ display: "grid", gap: 32 }}>
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 8 }}>
                   <h3 style={{ fontSize: "1.45rem", fontWeight: 800, margin: 0 }}>Page Views</h3>
-                  <button style={tinyBtn}><Clock3 size={16} /> Past 7 Days <ChevronRight size={14} style={{ transform: "rotate(90deg)" }} /></button>
+                  <button style={{ ...tinyBtn, width: isMobile ? "100%" : "auto", justifyContent: "center" }}><Clock3 size={16} /> Past 7 Days <ChevronRight size={14} style={{ transform: "rotate(90deg)" }} /></button>
                 </div>
                 <p style={{ color: "var(--manage-muted)", fontSize: "0.95rem", marginBottom: 24 }}>See recent page views of the event page.</p>
                 <div style={{ padding: 40, background: "var(--manage-card)", borderRadius: 24, border: "1px solid #f1f1f1", position: "relative", minHeight: 300, display: "flex", alignItems: "flex-end", gap: 12 }}>
@@ -734,10 +745,10 @@ export default function ManageEventPage() {
                    </div>
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 32 }}>
                 <div>
                    <h4 style={{ fontWeight: 800, fontSize: "1.1rem", marginBottom: 20 }}>Page Views</h4>
-                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 16 }}>
                       <div><div style={{ fontSize: "0.85rem", color: "var(--manage-muted)", fontWeight: 700 }}>24 hours</div><div style={{ fontSize: "1.5rem", fontWeight: 800 }}>2</div></div>
                       <div><div style={{ fontSize: "0.85rem", color: "var(--manage-muted)", fontWeight: 700 }}>7 days</div><div style={{ fontSize: "1.5rem", fontWeight: 800 }}>2</div></div>
                       <div><div style={{ fontSize: "0.85rem", color: "var(--manage-muted)", fontWeight: 700 }}>30 days</div><div style={{ fontSize: "1.5rem", fontWeight: 800 }}>2</div></div>
@@ -792,25 +803,25 @@ export default function ManageEventPage() {
               <section>
                 <h3 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "0 0 12px" }}>Event Page</h3>
                 <p style={{ color: "var(--manage-muted)", fontSize: "1.05rem", lineHeight: 1.5, marginBottom: 28 }}>When you choose a new URL, the current one will no longer work. Do not change your URL if you have already shared the event.</p>
-                <div style={{ padding: "14px 20px", background: "var(--manage-hover)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, fontSize: "0.9rem", color: "var(--manage-muted)" }}>
+                <div style={{ padding: "14px 20px", background: "var(--manage-hover)", borderRadius: 12, display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 12, marginBottom: 24, fontSize: "0.9rem", color: "var(--manage-muted)" }}>
                    <span>Upgrade to Luma Plus to set a custom URL for this event.</span>
                    <span style={{ fontWeight: 700, cursor: "pointer" }}>Learn More</span>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--manage-muted)" }}>Public URL</div>
-                   <div style={{ display: "flex", gap: 12 }}>
+                   <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12 }}>
                       <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "12px 16px", background: "#f9f9f9", borderRadius: 12, border: "1px solid #eee", fontSize: "1.05rem" }}>
                          <span style={{ color: "#bbb", marginRight: 8 }}>lu.ma/</span>
                          <span style={{ fontWeight: 600 }}>{event.slug}</span>
                       </div>
-                      <button style={{ ...actionPrimary, background: "var(--manage-muted)", borderRadius: 12, cursor: "not-allowed" }}>Update</button>
+                      <button style={{ ...actionPrimary, background: "var(--manage-muted)", borderRadius: 12, cursor: "not-allowed", width: isMobile ? "100%" : "auto", justifyContent: "center" }}>Update</button>
                    </div>
                 </div>
               </section>
               <section>
                 <h3 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "0 0 12px" }}>Embed Event</h3>
                 <p style={{ color: "var(--manage-muted)", fontSize: "1.05rem", lineHeight: 1.5, marginBottom: 28 }}>Have your own site? Embed the event to let visitors know about it.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 32 }}>
                    <div style={embedCardActive}>
                       <div style={{ ...iconCircleSmall, background: "rgba(236, 72, 153, 0.1)", color: "#ec4899" }}><Layout size={16} /></div>
                       <span style={{ fontWeight: 700 }}>Embed as Button</span>
@@ -863,18 +874,18 @@ export default function ManageEventPage() {
 
       {inviteOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.2)", display: "grid", placeItems: "center", zIndex: 1000 }}>
-          <div style={{ width: "min(92vw, 840px)", height: "min(90vh, 600px)", background: "var(--manage-card)", borderRadius: 24, boxShadow: "0 24px 60px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-             <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ width: "min(94vw, 840px)", height: "min(90vh, 600px)", background: "var(--manage-card)", borderRadius: isMobile ? 18 : 24, boxShadow: "0 24px 60px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+             <div style={{ padding: isMobile ? "16px" : "16px 24px", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <span style={{ fontWeight: 800, fontSize: "1.1rem" }}>Invite Guests</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                   <div style={{ padding: "4px 12px", borderRadius: 20, border: "1px solid #eee", fontSize: "0.8rem", fontWeight: 700, color: "var(--manage-muted)", display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                   <div style={{ padding: "4px 12px", borderRadius: 20, border: "1px solid #eee", fontSize: "0.8rem", fontWeight: 700, color: "var(--manage-muted)", display: isCompact ? "none" : "flex", alignItems: "center", gap: 6 }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", border: "2px solid #ddd" }} /> 15 LEFT
                    </div>
                    <button onClick={() => setInviteOpen(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--manage-muted)" }}><X size={20} /></button>
                 </div>
              </div>
-             <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
-                <div style={{ width: 260, borderRight: "1px solid #f0f0f0", background: "#fdfdfd", padding: "20px 12px" }}>
+             <div style={{ flex: 1, display: "flex", flexDirection: isMobile ? "column" : "row", minHeight: 0 }}>
+                <div style={{ width: isMobile ? "100%" : 260, borderRight: isMobile ? "none" : "1px solid #f0f0f0", borderBottom: isMobile ? "1px solid #f0f0f0" : "none", background: "#fdfdfd", padding: "20px 12px" }}>
                    <div style={{ display: "grid", gap: 4 }}>
                       <div style={{ ...inviteSidebarItem, background: "var(--manage-hover)", color: "#000" }}><Sparkles size={16} /> Suggestions</div>
                       <div style={inviteSidebarItem}><AtSign size={16} /> Enter Emails</div>
@@ -888,7 +899,7 @@ export default function ManageEventPage() {
                       <Clock3 size={14} /> This is your first event.
                    </div>
                 </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60, textAlign: "center" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: isMobile ? 24 : 60, textAlign: "center", overflowY: "auto" }}>
                    <div style={{ position: "relative", width: 200, height: 160, marginBottom: 40 }}>
                       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                          <div style={{ width: 80, height: 80, background: "var(--manage-card)", border: "1px solid #eee", borderRadius: 20, boxShadow: "0 12px 24px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", color: "#ddd" }}>
@@ -906,8 +917,8 @@ export default function ManageEventPage() {
                    <button style={{ ...actionPrimary, background: "#4285f4", padding: "14px 40px", borderRadius: 12 }}><Zap size={18} /> Import from Google</button>
                 </div>
              </div>
-             <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0", display: "flex", justifyContent: "flex-end" }}>
-                <button style={{ ...actionPrimary, background: "#bbb", borderRadius: 10, padding: "10px 24px" }}>Next <ChevronRight size={18} /></button>
+             <div style={{ padding: isMobile ? "16px" : "16px 24px", borderTop: "1px solid #f0f0f0", display: "flex", justifyContent: "flex-end" }}>
+                <button style={{ ...actionPrimary, background: "#bbb", borderRadius: 10, padding: "10px 24px", width: isMobile ? "100%" : "auto", justifyContent: "center" }}>Next <ChevronRight size={18} /></button>
              </div>
           </div>
         </div>
@@ -915,7 +926,7 @@ export default function ManageEventPage() {
 
       {isCheckInOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.2)", display: "grid", placeItems: "center", zIndex: 1100 }}>
-          <div style={{ width: 360, background: "var(--manage-card)", borderRadius: 24, padding: 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.15)", position: "relative" }}>
+          <div style={{ width: "min(92vw, 360px)", background: "var(--manage-card)", borderRadius: 24, padding: isMobile ? 24 : 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.15)", position: "relative" }}>
              <button onClick={() => setIsCheckInOpen(false)} style={{ position: "absolute", top: 16, right: 16, border: "none", background: "transparent", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
              <div style={{ ...iconCircle, background: "var(--manage-hover)", color: "var(--manage-fg)", width: 64, height: 64, margin: "0 auto 24px" }}><QrCode size={32} /></div>
              <h3 style={{ fontSize: "1.45rem", fontWeight: 800, marginBottom: 16 }}>Check In Guests</h3>
@@ -931,7 +942,7 @@ export default function ManageEventPage() {
 
       {isGuestListOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.2)", display: "grid", placeItems: "center", zIndex: 1100 }}>
-          <div style={{ width: 360, background: "var(--manage-card)", borderRadius: 24, padding: 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.15)", position: "relative" }}>
+          <div style={{ width: "min(92vw, 360px)", background: "var(--manage-card)", borderRadius: 24, padding: isMobile ? 24 : 32, textAlign: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.15)", position: "relative" }}>
              <button onClick={() => setIsGuestListOpen(false)} style={{ position: "absolute", top: 16, right: 16, border: "none", background: "transparent", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
              <div style={{ ...iconCircle, background: "var(--manage-hover)", color: "var(--manage-fg)", width: 64, height: 64, margin: "0 auto 24px" }}><Users size={32} /></div>
              <h3 style={{ fontSize: "1.45rem", fontWeight: 800, marginBottom: 16 }}>Public Guest List</h3>
@@ -996,6 +1007,7 @@ const topNavLinkStyle: React.CSSProperties = {
   fontWeight: 700,
   fontSize: "0.98rem",
   padding: "6px 2px",
+  whiteSpace: "nowrap",
 };
 
 const topNavActiveLinkStyle: React.CSSProperties = {
@@ -1039,7 +1051,7 @@ function PageShell({ children }: { children: React.ReactNode }) {
 
 function TabBar({ activeTab, onChange }: { activeTab: (typeof tabs)[number]["key"]; onChange: (key: (typeof tabs)[number]["key"]) => void; }) {
   return (
-    <div style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--manage-card-border)", marginBottom: 24 }}>
+    <div style={{ display: "flex", gap: 18, borderBottom: "1px solid var(--manage-card-border)", marginBottom: 24, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none", msOverflowStyle: "none" }}>
       {tabs.map((tab) => {
         const active = tab.key === activeTab;
         return (
@@ -1053,6 +1065,8 @@ function TabBar({ activeTab, onChange }: { activeTab: (typeof tabs)[number]["key
               color: active ? "var(--manage-fg)" : "var(--manage-muted)", 
               fontWeight: active ? 700 : 500, 
               fontSize: "0.96rem",
+              flex: "0 0 auto",
+              whiteSpace: "nowrap",
               cursor: "pointer", 
               borderBottom: active ? "2px solid var(--manage-fg)" : "2px solid transparent",
               transition: "all 0.2s"
@@ -1071,7 +1085,7 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
 }
 
 function Modal({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: React.ReactNode; }) {
-  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", display: "grid", placeItems: "center", padding: 18, zIndex: 200 }}><div style={{ width: "min(92vw, 560px)", background: "var(--manage-card)", borderRadius: 24, border: "1px solid var(--manage-card-border)", boxShadow: "0 26px 56px rgba(0,0,0,0.16)" }}><div style={{ padding: "18px 20px 14px", borderBottom: "1px solid var(--manage-card-border)", display: "flex", justifyContent: "space-between", gap: 16 }}><div><div style={{ fontSize: "1.15rem", fontWeight: 800, color:"var(--manage-fg)" }}>{title}</div><div style={{ color: "var(--manage-muted)", marginTop: 6, fontSize: "0.92rem" }}>{subtitle}</div></div><button onClick={onClose} style={{ border: "none", background: "transparent", color: "var(--manage-muted)", cursor: "pointer" }}><X size={20} /></button></div><div style={{ padding: 20 }}>{children}</div></div></div>;
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", display: "grid", placeItems: "center", padding: 12, zIndex: 200 }}><div style={{ width: "min(96vw, 560px)", maxHeight: "calc(100vh - 24px)", background: "var(--manage-card)", borderRadius: 24, border: "1px solid var(--manage-card-border)", boxShadow: "0 26px 56px rgba(0,0,0,0.16)", overflow: "hidden" }}><div style={{ padding: "18px 20px 14px", borderBottom: "1px solid var(--manage-card-border)", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}><div><div style={{ fontSize: "1.15rem", fontWeight: 800, color:"var(--manage-fg)" }}>{title}</div><div style={{ color: "var(--manage-muted)", marginTop: 6, fontSize: "0.92rem" }}>{subtitle}</div></div><button onClick={onClose} style={{ border: "none", background: "transparent", color: "var(--manage-muted)", cursor: "pointer" }}><X size={20} /></button></div><div style={{ padding: 20, maxHeight: "calc(100vh - 140px)", overflowY: "auto" }}>{children}</div></div></div>;
 }
 
 const metaChip: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: 999, background: "var(--manage-card)", border: "1px solid var(--manage-card-border)", fontWeight: 700, fontSize: "0.82rem", color: "var(--manage-fg)" };
@@ -1091,10 +1105,10 @@ const tinyBtn: React.CSSProperties = { padding: "7px 10px", borderRadius: 10, ba
 
 const iconCircleSmall: React.CSSProperties = { width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" };
 const quickActionCardSmall: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "var(--manage-card)", color: "var(--manage-fg)", borderRadius: 14, border: "1px solid var(--manage-card-border)", cursor: "pointer" };
-const questionBox: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--manage-hover)", borderRadius: 12, fontSize: "0.86rem", color: "var(--manage-muted)", border: "1px solid var(--manage-card-border)" };
+const questionBox: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", background: "var(--manage-hover)", borderRadius: 12, fontSize: "0.86rem", color: "var(--manage-muted)", border: "1px solid var(--manage-card-border)" };
 const blastIcon: React.CSSProperties = { position: "absolute", width: 34, height: 34, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.05)" };
-const systemMsgRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "10px 0" };
-const trafficRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "10px 0" };
+const systemMsgRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "10px 0" };
+const trafficRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "10px 0" };
 
 const embedCard: React.CSSProperties = { padding: 14, background: "var(--manage-card)", color: "var(--manage-fg)", border: "1px solid var(--manage-card-border)", borderRadius: 14, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" };
 const embedCardActive: React.CSSProperties = { ...embedCard, border: "1px solid #a855f7", background: "rgba(168, 85, 247, 0.05)" };

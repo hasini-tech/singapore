@@ -1,0 +1,10 @@
+{
+  "/api/[...path]/route": "app/api/[...path]/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/(hydrogen)/calendars/create/page": "app/(hydrogen)/calendars/create/page.js",
+  "/(hydrogen)/calendars/[slug]/page": "app/(hydrogen)/calendars/[slug]/page.js",
+  "/(hydrogen)/manage/[slug]/page": "app/(hydrogen)/manage/[slug]/page.js",
+  "/(hydrogen)/create-event/page": "app/(hydrogen)/create-event/page.js",
+  "/(hydrogen)/events/browse/page": "app/(hydrogen)/events/browse/page.js",
+  "/(hydrogen)/events/page": "app/(hydrogen)/events/page.js"
+}

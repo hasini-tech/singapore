@@ -38,15 +38,16 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "additional.d.ts",
+    "**/*.cjs",
     "**/*.d.ts",
+    "**/*.mjs",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs",
+    ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "additional.d.ts",
+    "next-env.d.ts",
+    ".next-dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

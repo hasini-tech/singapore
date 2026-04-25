@@ -55,7 +55,7 @@ export default function CalendarsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full py-8">
+    <div className="min-h-screen w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-[1180px]">
       <PageHeader
         title="Calendars"
@@ -64,20 +64,20 @@ export default function CalendarsPage() {
           { name: 'Calendars' },
         ]}
       >
-        <Link href={routes.calendarsCreate} className="primary-button">
+        <Link href={routes.calendarsCreate} className="primary-button inline-flex w-full items-center justify-center sm:w-auto">
           Create Calendar
         </Link>
       </PageHeader>
 
       <div className="space-y-6">
-        <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-6">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Your calendar workspace</h2>
           <p className="max-w-2xl text-sm text-slate-600">
             Create calendars to organize events, manage attendees, and share your event collection.
           </p>
         </section>
 
-        <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-6">
           {loading ? (
             <div className="text-sm text-slate-500">Loading calendars…</div>
           ) : error ? (
@@ -85,15 +85,15 @@ export default function CalendarsPage() {
           ) : calendars.length === 0 ? (
             <div className="grid gap-4">
               <div className="text-sm text-slate-600">No calendars found yet.</div>
-              <Link href={routes.calendarsCreate} className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+              <Link href={routes.calendarsCreate} className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 sm:w-fit">
                 Create your first calendar
               </Link>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
               {calendars.map((calendar) => (
                 <div key={calendar.id} className="rounded-3xl border border-slate-200 p-5 shadow-sm">
-                  <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
                       <div className="mb-2 text-lg font-semibold text-slate-900">{calendar.name}</div>
                       <div className="text-sm text-slate-500">{calendar.location_scope === 'city' ? calendar.city || 'City calendar' : 'Global calendar'}</div>
@@ -108,7 +108,7 @@ export default function CalendarsPage() {
                     <span>{calendar.subscriber_count} subscriber{calendar.subscriber_count === 1 ? '' : 's'}</span>
                     <span>{calendar.event_count} events</span>
                   </div>
-                  <Link href={`/calendars/${calendar.slug}`} className="mt-5 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                  <Link href={`/calendars/${calendar.slug}`} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 sm:w-fit">
                     View calendar
                   </Link>
                 </div>

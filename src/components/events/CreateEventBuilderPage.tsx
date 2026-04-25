@@ -16,6 +16,7 @@ import api from "@/lib/api";
 import { DEFAULT_EVENT_COVER } from "@/lib/defaults";
 import Image from 'next/image';
 import { useTheme } from "next-themes";
+import { useMedia } from "@/hooks/use-media";
 
 // ─── Theme system ─────────────────────────────────────────────────────────────
 type ThemeId = 'minimal'|'quantum'|'warp'|'emoji'|'confetti'|'pattern'|'seasonal';
@@ -293,19 +294,45 @@ function SeasonalBg() {
 }
 
 // ─── Portal wrapper for dropdowns (avoids stacking-context clipping) ──────────
-function DropPortal({ anchor, children, align = 'left' }: { anchor: React.RefObject<HTMLElement|null>; children: React.ReactNode; align?: 'left'|'right' }) {
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+function DropPortal({
+  anchor,
+  children,
+  align = 'left',
+  width = 296,
+}: {
+  anchor: React.RefObject<HTMLElement | null>;
+  children: React.ReactNode;
+  align?: 'left' | 'right';
+  width?: number;
+}) {
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   useEffect(() => {
-    if (!anchor.current) return;
-    const r = anchor.current.getBoundingClientRect();
-    const left = align === 'right' ? r.right - 300 : r.left;
-    setPos({ top: r.bottom + 6, left });
-  }, [anchor, align]);
+    const update = () => {
+      if (!anchor.current || typeof window === 'undefined') return;
+
+      const gutter = 12;
+      const r = anchor.current.getBoundingClientRect();
+      const nextWidth = Math.min(width, window.innerWidth - gutter * 2);
+      let left = align === 'right' ? r.right - nextWidth : r.left;
+      left = Math.max(gutter, Math.min(left, window.innerWidth - nextWidth - gutter));
+
+      setPos({ top: r.bottom + 6, left, width: nextWidth });
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [anchor, align, width]);
 
   if (!pos || typeof document === 'undefined') return null;
   return createPortal(
-    <div style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}>
+    <div style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 99999 }}>
       {children}
     </div>,
     document.body
@@ -330,8 +357,8 @@ function CalendarPopup({ value, onChange, onClose, C, anchor }: { value:string; 
   })();
 
   return (
-    <DropPortal anchor={anchor}>
-      <div style={{width:296,background:C.scrollBg,borderRadius:16,boxShadow:'0 24px 60px rgba(0,0,0,0.3)',padding:'18px 16px 14px',border:`1px solid ${C.chipBorder}`,userSelect:'none'}} onClick={e=>e.stopPropagation()}>
+    <DropPortal anchor={anchor} width={296}>
+      <div style={{width:'100%',background:C.scrollBg,borderRadius:16,boxShadow:'0 24px 60px rgba(0,0,0,0.3)',padding:'18px 16px 14px',border:`1px solid ${C.chipBorder}`,userSelect:'none'}} onClick={e=>e.stopPropagation()}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
           <span style={{fontSize:16,fontWeight:700,color:C.text}}>{view.toLocaleString('en-US',{month:'long'})}</span>
           <div style={{display:'flex',alignItems:'center',gap:4}}>
@@ -375,8 +402,8 @@ function TimePicker({ value, onChange, onClose, C, anchor }: { value:string; onC
   useEffect(()=>{ const idx=TIMES.indexOf(value); if(listRef.current&&idx>=0) listRef.current.scrollTop=idx*44-88; },[value]);
 
   return (
-    <DropPortal anchor={anchor}>
-      <div ref={listRef} onClick={e=>e.stopPropagation()} style={{width:120,background:C.scrollBg,borderRadius:14,boxShadow:'0 20px 60px rgba(0,0,0,0.3)',maxHeight:280,overflowY:'auto',border:`1px solid ${C.chipBorder}`,scrollbarWidth:'none'}}>
+    <DropPortal anchor={anchor} width={120}>
+      <div ref={listRef} onClick={e=>e.stopPropagation()} style={{width:'100%',background:C.scrollBg,borderRadius:14,boxShadow:'0 20px 60px rgba(0,0,0,0.3)',maxHeight:280,overflowY:'auto',border:`1px solid ${C.chipBorder}`,scrollbarWidth:'none'}}>
         {TIMES.map(t=>{
           const isSel=t===value;
           return (
@@ -402,11 +429,11 @@ function TimezonePicker({ value, onChange, onClose, C }: { value:string; onChang
   const [q,setQ]=useState('');
   const filtered=q?POPULAR_TIMEZONES.filter(z=>z.label.toLowerCase().includes(q.toLowerCase())||z.offset.includes(q)):POPULAR_TIMEZONES;
   return (
-    <div onClick={e=>e.stopPropagation()} style={{position:'absolute',top:'calc(100% + 8px)',right:0,width:340,background:C.scrollBg,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.28)',zIndex:9999,border:`1px solid ${C.chipBorder}`,overflow:'hidden'}}>
+    <div onClick={e=>e.stopPropagation()} style={{position:'absolute',top:'calc(100% + 8px)',right:0,width:'min(340px, calc(100vw - 24px))',background:C.scrollBg,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.28)',zIndex:9999,border:`1px solid ${C.chipBorder}`,overflow:'hidden'}}>
       <div style={{padding:'12px 14px',borderBottom:`1px solid ${C.tzBorder}`}}>
         <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search for a timezone" style={{width:'100%',border:'none',outline:'none',fontSize:14,color:C.text,background:'transparent',fontFamily:'inherit'}}/>
       </div>
-      <div style={{maxHeight:320,overflowY:'auto',scrollbarWidth:'thin'}}>
+      <div style={{maxHeight:'min(60vh, 320px)',overflowY:'auto',scrollbarWidth:'thin'}}>
         <div style={{padding:'10px 14px 4px',fontSize:11,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:'0.05em'}}>Popular Time Zones</div>
         {filtered.map((tz,i)=>(
           <div key={i} onClick={()=>{onChange(tz);onClose();}} style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'10px 14px',cursor:'pointer',background:value===tz.tz?C.inputBg:'transparent',transition:'background 0.1s'}}
@@ -427,7 +454,7 @@ function VisibilityPicker({ value, onChange, onClose, C }: { value:EventStatus; 
     {id:'private' as EventStatus,icon:<PiSparkle size={16}/>,label:'Private',desc:'Unlisted. Only people with the link can register.'},
   ];
   return (
-    <div onClick={e=>e.stopPropagation()} style={{position:'absolute',top:'calc(100% + 8px)',right:0,width:280,background:C.scrollBg,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.28)',zIndex:9999,border:`1px solid ${C.chipBorder}`,overflow:'hidden'}}>
+    <div onClick={e=>e.stopPropagation()} style={{position:'absolute',top:'calc(100% + 8px)',right:0,width:'min(280px, calc(100vw - 24px))',background:C.scrollBg,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.28)',zIndex:9999,border:`1px solid ${C.chipBorder}`,overflow:'hidden'}}>
       {opts.map((o,i)=>(
         <div key={o.id} onClick={()=>{onChange(o.id);onClose();}} style={{display:'flex',alignItems:'flex-start',gap:12,padding:'14px 16px',cursor:'pointer',background:value===o.id?C.inputBg:'transparent',borderBottom:i<opts.length-1?`1px solid ${C.tzBorder}`:'none',transition:'background 0.1s'}}
         onMouseEnter={e=>{if(value!==o.id)(e.currentTarget as HTMLDivElement).style.background=C.optionHover;}}
@@ -559,6 +586,7 @@ export default function CreateEventBuilderPage() {
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { theme, setTheme } = useTheme();
+  const isMobile = useMedia('(max-width: 640px)', false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const startDateRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<HTMLDivElement>(null);
@@ -729,11 +757,134 @@ export default function CreateEventBuilderPage() {
 
         .nav-link { display:flex; align-items:center; gap:5px; color:${C.muted}; text-decoration:none; font-size:13px; font-weight:500; transition:color 0.15s; }
         .nav-link:hover { color:${C.text}; }
+
+        @media (max-width: 1024px) {
+          .create-builder-header {
+            padding: 10px 12px !important;
+          }
+
+          .create-builder-divider {
+            display: none !important;
+          }
+
+          .create-builder-topbar {
+            width: 100%;
+            justify-content: space-between;
+            gap: 10px !important;
+            border-radius: 14px !important;
+            padding: 8px 10px !important;
+          }
+
+          .create-builder-topnav {
+            display: none !important;
+          }
+
+          .create-event-builder-form {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+            padding: 20px 16px 96px !important;
+          }
+
+          .create-event-builder-left,
+          .create-event-builder-right {
+            width: 100%;
+          }
+
+          .create-event-builder-datetime-row {
+            grid-template-columns: 1fr !important;
+          }
+
+          .create-event-builder-timezone > div:first-child {
+            border-left: none !important;
+            border-top: 1px solid ${C.tzBorder} !important;
+            border-radius: 0 0 16px 16px !important;
+          }
+
+          .create-event-builder-time-row {
+            flex-wrap: wrap;
+          }
+
+          .create-event-builder-time-row > span {
+            width: auto !important;
+          }
+
+          .create-event-builder-time-chips {
+            min-width: 100%;
+            flex-wrap: wrap;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .create-event-builder-form {
+            padding: 14px 12px 84px !important;
+          }
+
+          .create-event-builder-pill-row {
+            flex-direction: column;
+            align-items: stretch !important;
+          }
+
+          .create-event-builder-theme-row {
+            align-items: stretch;
+          }
+
+          .create-event-builder-title {
+            font-size: 1.7rem !important;
+          }
+
+          .create-event-builder-time-chips > div {
+            flex: 1 1 100%;
+            min-width: 0;
+          }
+
+          .luma-pill,
+          .date-chip {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .luma-input-row,
+          .luma-option-row {
+            align-items: flex-start;
+          }
+
+          .luma-option-row {
+            flex-wrap: wrap;
+          }
+
+          .create-builder-theme-panel {
+            max-height: 80vh;
+            overflow-y: auto;
+          }
+
+          .create-builder-theme-panel-header {
+            padding: 16px 16px 12px !important;
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 10px;
+          }
+
+          .create-builder-theme-grid {
+            gap: 14px !important;
+            padding: 8px 16px 20px !important;
+            justify-content: flex-start !important;
+          }
+
+          .create-builder-modal-card {
+            max-width: calc(100vw - 24px) !important;
+            margin: 0 auto;
+            padding: 18px !important;
+          }
+
+          .create-builder-controls > svg {
+            display: none !important;
+          }
+        }
       `}</style>
 
       {/* ── Header ── */}
-      <header style={{ display: 'flex', justifyContent: 'center', padding: '14px 32px', position: 'relative', zIndex: 10 }}>
-        <div style={{
+      <header className="create-builder-header" style={{ display: 'flex', justifyContent: 'center', padding: '14px 32px', position: 'relative', zIndex: 10 }}>
+        <div className="create-builder-topbar" style={{
           display: 'flex',
           alignItems: 'center',
           gap: 20,
@@ -749,19 +900,19 @@ export default function CreateEventBuilderPage() {
             GrowthLab <span style={{ fontWeight: 500, color: C.muted }}>Lite</span>
           </div>
 
-          <div style={{ width: 1, height: 18, background: isDark ? '#334155' : '#eee' }} />
+          <div className="create-builder-divider" style={{ width: 1, height: 18, background: isDark ? '#334155' : '#eee' }} />
 
           {/* Nav Links */}
-          <nav style={{ display: 'flex', gap: 24, padding: '0 8px' }}>
+          <nav className="create-builder-topnav" style={{ display: 'flex', gap: 24, padding: '0 8px' }}>
             <Link href="#" style={{ textDecoration: 'none', color: '#6366f1', fontSize: '0.92rem', fontWeight: 700 }}>Events</Link>
             <Link href="#" style={{ textDecoration: 'none', color: C.muted, fontSize: '0.92rem', fontWeight: 600, transition: 'color 0.2s' }}>Calendars</Link>
             <Link href="#" style={{ textDecoration: 'none', color: C.muted, fontSize: '0.92rem', fontWeight: 600, transition: 'color 0.2s' }}>Discover</Link>
           </nav>
 
-          <div style={{ width: 1, height: 18, background: isDark ? '#334155' : '#eee' }} />
+          <div className="create-builder-divider" style={{ width: 1, height: 18, background: isDark ? '#334155' : '#eee' }} />
 
           {/* Controls & Avatar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingLeft: 4 }}>
+          <div className="create-builder-controls" style={{ display: 'flex', alignItems: 'center', gap: 14, paddingLeft: 4 }}>
             <div onClick={() => {
               const toDark = !isDark;
               setTheme(toDark ? 'dark' : 'light');
@@ -778,19 +929,19 @@ export default function CreateEventBuilderPage() {
       </header>
 
       {/* ── Builder ── */}
-      <form onSubmit={handleSubmit} style={{maxWidth:1100,margin:'0 auto',padding:'32px 32px 140px',display:'grid',gridTemplateColumns:'minmax(280px,340px) 1fr',gap:48,alignItems:'start',position:'relative',zIndex:10}}>
+      <form className="create-event-builder-form" onSubmit={handleSubmit} style={{maxWidth:1100,margin:'0 auto',padding:'32px 32px 140px',display:'grid',gridTemplateColumns:'minmax(280px,340px) 1fr',gap:48,alignItems:'start',position:'relative',zIndex:10}}>
 
         {/* LEFT: Image + Theme */}
-        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+        <div className="create-event-builder-left" style={{display:'flex',flexDirection:'column',gap:14}}>
           <div style={{aspectRatio:'1',borderRadius:20,position:'relative',overflow:'hidden',background:'#3b0764',boxShadow:`0 24px 60px rgba(0,0,0,${isDark?0.5:0.14})`, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <img src={uploadedImage||'/growthlab/startup-team-collaboration.png'} alt="Cover" style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}}/>
+            <img className="evently-image" src={uploadedImage||'/growthlab/startup-team-collaboration.png'} alt="Cover" style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}}/>
             <button type="button" onClick={()=>fileInputRef.current?.click()} style={{position:'absolute',bottom:14,right:14,width:34,height:34,borderRadius:'50%',background:'rgba(0,0,0,0.65)',color:'#fff',border:'none',display:'grid',placeItems:'center',cursor:'pointer',backdropFilter:'blur(6px)'}}>
               <PiCloudArrowUp size={16}/>
             </button>
             <input ref={fileInputRef} type="file" hidden onChange={handleImageUpload} accept="image/*"/>
           </div>
 
-          <div style={{display:'flex',gap:8}}>
+          <div className="create-event-builder-theme-row" style={{display:'flex',gap:8}}>
             <div onClick={e=>{e.stopPropagation();setShowThemePanel(p=>!p);}} style={{flex:1,background:C.inputBg,padding:'10px 13px',borderRadius:14,border:`1px solid ${C.chipBorder}`,display:'flex',alignItems:'center',gap:10,cursor:'pointer',transition:'border-color 0.15s',backdropFilter:'blur(4px)'}}>
               <div style={{width:30,height:22,borderRadius:6,overflow:'hidden',flexShrink:0,border:`1px solid ${C.chipBorder}`}}>
                 {/* mini preview */}
@@ -812,10 +963,10 @@ export default function CreateEventBuilderPage() {
         </div>
 
         {/* RIGHT: Fields */}
-        <div style={{display:'flex',flexDirection:'column',gap:18}}>
+        <div className="create-event-builder-right" style={{display:'flex',flexDirection:'column',gap:18}}>
 
           {/* Header pills */}
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div className="create-event-builder-pill-row" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
             <div className="luma-pill"><span>🎃</span><span>{selectedCalendar?.name||'Personal Calendar'}</span><PiCaretDown size={12}/></div>
             <div style={{position:'relative'}}>
               <div className="luma-pill" onClick={e=>{e.stopPropagation();toggle('visibility');}}
@@ -827,21 +978,21 @@ export default function CreateEventBuilderPage() {
           </div>
 
           {/* Title */}
-          <input placeholder="Event Name" value={form.title} onChange={e=>setField('title',e.target.value)}
+          <input className="create-event-builder-title" placeholder="Event Name" value={form.title} onChange={e=>setField('title',e.target.value)}
             style={{fontSize:'2.2rem',fontWeight:700,color:form.title?C.text:C.placeholder,letterSpacing:'-0.03em',lineHeight:1.1,padding:0,width:'100%',background:'transparent'}}/>
 
           {/* Date & Time */}
           <div style={{background:C.inputBg,borderRadius:16,border:`1px solid ${C.chipBorder}`}}>
-            <div style={{display:'grid',gridTemplateColumns:'1fr auto'}}>
+            <div className="create-event-builder-datetime-row" style={{display:'grid',gridTemplateColumns:'1fr auto'}}>
               <div style={{padding:'4px 0'}}>
                 {/* START */}
-                <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px'}}>
+                <div className="create-event-builder-time-row" style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px'}}>
                   <div style={{position:'relative',display:'flex',alignItems:'center',flexShrink:0}}>
                     <div style={{width:9,height:9,borderRadius:'50%',background:C.muted}}/>
                     <div style={{position:'absolute',top:12,left:3.5,height:28,borderLeft:`1.5px dashed ${C.light}`}}/>
                   </div>
                   <span style={{fontSize:13,fontWeight:600,color:C.muted,width:36,flexShrink:0}}>Start</span>
-                  <div style={{display:'flex',gap:8,flex:1}}>
+                  <div className="create-event-builder-time-chips" style={{display:'flex',gap:8,flex:1}}>
                     <div ref={startDateRef} style={{position:'relative'}}>
                       <div className={`date-chip${active==='startDate'?' open':''}`} onClick={e=>{e.stopPropagation();setActive(active==='startDate'?null:'startDate');}}>
                         {fmtDate(form.date)}
@@ -858,10 +1009,10 @@ export default function CreateEventBuilderPage() {
                 </div>
 
                 {/* END */}
-                <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px'}}>
+                <div className="create-event-builder-time-row" style={{display:'flex',alignItems:'center',gap:10,padding:'10px 16px'}}>
                   <div style={{width:9,height:9,borderRadius:'50%',border:`1.5px solid ${C.light}`,flexShrink:0}}/>
                   <span style={{fontSize:13,fontWeight:600,color:C.muted,width:36,flexShrink:0}}>End</span>
-                  <div style={{display:'flex',gap:8,flex:1}}>
+                  <div className="create-event-builder-time-chips" style={{display:'flex',gap:8,flex:1}}>
                     <div ref={endDateRef} style={{position:'relative'}}>
                       <div className={`date-chip${active==='endDate'?' open':''}`} onClick={e=>{e.stopPropagation();setActive(active==='endDate'?null:'endDate');}}>
                         {fmtDate(endDate)}
@@ -879,7 +1030,7 @@ export default function CreateEventBuilderPage() {
               </div>
 
               {/* Timezone */}
-              <div ref={timezoneRef} style={{position:'relative'}}>
+              <div ref={timezoneRef} className="create-event-builder-timezone" style={{position:'relative'}}>
                 <div onClick={e=>{e.stopPropagation();toggle('timezone');}} style={{display:'flex',flexDirection:'column',gap:3,padding:'14px 16px',borderLeft:`1px solid ${C.tzBorder}`,background:active==='timezone'?C.inputBg2:'transparent',cursor:'pointer',height:'100%',justifyContent:'center',minWidth:100,transition:'background 0.15s',borderRadius:'0 16px 16px 0'}}>
                   <PiGlobe size={14} color={C.muted}/>
                   <div style={{fontSize:12,fontWeight:700,color:C.text}}>{timezone.offset}</div>
@@ -942,9 +1093,9 @@ export default function CreateEventBuilderPage() {
 
       {/* ── Theme Panel ── */}
       {showThemePanel&&(
-        <div onClick={e=>e.stopPropagation()} style={{position:'fixed',bottom:0,left:0,right:0,background:isDark?'rgba(10,8,24,0.97)':'rgba(252,250,255,0.98)',borderTop:`1px solid ${C.chipBorder}`,boxShadow:`0 -20px 70px rgba(0,0,0,${isDark?0.65:0.14})`,zIndex:1000,backdropFilter:'blur(28px)'}}>
+        <div className="create-builder-theme-panel" onClick={e=>e.stopPropagation()} style={{position:'fixed',bottom:0,left:0,right:0,background:isDark?'rgba(10,8,24,0.97)':'rgba(252,250,255,0.98)',borderTop:`1px solid ${C.chipBorder}`,boxShadow:`0 -20px 70px rgba(0,0,0,${isDark?0.65:0.14})`,zIndex:1000,backdropFilter:'blur(28px)',maxHeight:isMobile?'80vh':undefined}}>
           {/* Header */}
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 36px 12px'}}>
+          <div className="create-builder-theme-panel-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 36px 12px'}}>
             <div>
               <span style={{fontSize:14,fontWeight:800,color:C.text,letterSpacing:'-0.01em'}}>Event Theme</span>
               <span style={{fontSize:12,color:C.muted,marginLeft:10}}>Pick a vibe for your event page</span>
@@ -954,7 +1105,7 @@ export default function CreateEventBuilderPage() {
             </button>
           </div>
           {/* Thumbnails — wrap grid centred */}
-          <div style={{display:'flex',flexWrap:'wrap',gap:20,padding:'4px 36px 24px',justifyContent:'center'}}>
+          <div className="create-builder-theme-grid" style={{display:'flex',flexWrap:'wrap',gap:20,padding:'4px 36px 24px',justifyContent:'center'}}>
             {THEMES.map(t=>(
               <ThemeThumb key={t.id} theme={t} selected={selectedTheme===t.id} onSelect={()=>setSelectedTheme(t.id)}/>
             ))}
@@ -966,11 +1117,12 @@ export default function CreateEventBuilderPage() {
       {showStripePopup && (
         <div 
           onClick={() => setShowStripePopup(false)}
-          style={{position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.1)'}}
+          style={{position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 20, background: 'rgba(0,0,0,0.1)'}}
         >
           <div 
+            className="create-builder-modal-card"
             onClick={e => e.stopPropagation()}
-            style={{background: '#fff', borderRadius: 20, padding: 24, width: '100%', maxWidth: 360, boxShadow: '0 24px 60px rgba(0,0,0,0.1)'}}
+            style={{background: '#fff', borderRadius: 20, padding: isMobile ? 18 : 24, width: '100%', maxWidth: 360, boxShadow: '0 24px 60px rgba(0,0,0,0.1)'}}
           >
             <div style={{width: 48, height: 48, borderRadius: 12, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, border: '1px solid #eee'}}>
               <PiTicket size={24} color="#333" />
@@ -992,11 +1144,12 @@ export default function CreateEventBuilderPage() {
       {showCapacityPopup && (
         <div 
           onClick={() => setShowCapacityPopup(false)}
-          style={{position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.1)'}}
+          style={{position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 20, background: 'rgba(0,0,0,0.1)'}}
         >
           <div 
+            className="create-builder-modal-card"
             onClick={e => e.stopPropagation()}
-            style={{background: '#222', borderRadius: 20, padding: 24, width: '100%', maxWidth: 360, boxShadow: '0 24px 60px rgba(0,0,0,0.4)', border: '1px solid #333'}}
+            style={{background: '#222', borderRadius: 20, padding: isMobile ? 18 : 24, width: '100%', maxWidth: 360, boxShadow: '0 24px 60px rgba(0,0,0,0.4)', border: '1px solid #333'}}
           >
             <div style={{width: 48, height: 48, borderRadius: 24, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, border: '1px solid rgba(255,255,255,0.05)'}}>
               <PiCloudArrowUp size={24} color="#fff" style={{transform: 'rotate(180deg)'}} /> 

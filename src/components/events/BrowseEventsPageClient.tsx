@@ -395,8 +395,8 @@ function EventCover({ event }: { event: EventRecord }) {
     <div
       style={{
         width: isMobile ? '100%' : '112px',
-        height: isMobile ? '180px' : '112px',
-        borderRadius: '18px',
+        height: isMobile ? '168px' : '112px',
+        borderRadius: isMobile ? '16px' : '18px',
         overflow: 'hidden',
         border: '1px solid var(--border-color)',
         background: 'var(--teal-050)',
@@ -407,6 +407,7 @@ function EventCover({ event }: { event: EventRecord }) {
       <img
         src={event.cover_image || DEFAULT_EVENT_COVER}
         alt={event.title}
+        className="evently-image"
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
     </div>
@@ -424,14 +425,14 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
           style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : 'minmax(96px, 132px) 1fr',
-            gap: '0',
+            gap: isMobile ? '10px' : '0',
             alignItems: 'start',
           }}
         >
-          <div style={{ paddingRight: isMobile ? '0' : '14px', paddingBottom: isMobile ? '8px' : '0' }}>
+          <div style={{ paddingRight: isMobile ? '0' : '14px', paddingBottom: isMobile ? '10px' : '0' }}>
             <div
               style={{
-                fontSize: isMobile ? '1.35rem' : '1.6rem',
+                fontSize: isMobile ? '1.2rem' : '1.6rem',
                 fontWeight: 800,
                 color: 'var(--primary-color)',
                 marginBottom: '2px',
@@ -470,6 +471,7 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                 <div key={event.id} style={{ position: 'relative' }}>
                   <div
                     style={{
+                      display: isMobile ? 'none' : 'block',
                       position: 'absolute',
                       left: '-31px',
                       top: '24px',
@@ -484,16 +486,23 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                   <div
                     className="surface-panel"
                     style={{
-                      borderRadius: '24px',
+                      borderRadius: isMobile ? '20px' : '24px',
                       padding: isMobile ? '16px' : '20px',
                       display: 'grid',
                       gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) auto',
                       gap: isMobile ? '16px' : '20px',
                       alignItems: isMobile ? 'stretch' : 'center',
-                      minHeight: '184px',
+                      minHeight: isMobile ? 'auto' : '184px',
                     }}
                   >
-                    <div style={{ display: 'grid', gap: '12px', paddingLeft: isMobile ? '0' : '4px' }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gap: '12px',
+                        paddingLeft: isMobile ? '0' : '4px',
+                        minWidth: 0,
+                      }}
+                    >
                       <div
                         style={{
                           display: 'inline-flex',
@@ -525,10 +534,11 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                         <h3
                           style={{
                             margin: 0,
-                            fontSize: '1.45rem',
+                            fontSize: isMobile ? '1.2rem' : '1.45rem',
                             fontWeight: 800,
                             color: 'var(--text-primary)',
                             letterSpacing: '-0.03em',
+                            lineHeight: 1.2,
                           }}
                         >
                           {event.title}
@@ -551,14 +561,25 @@ function Timeline({ groups }: { groups: EventGroup[] }) {
                       </div>
 
                       <div>
-                        <Link href={actionHref} className="primary-button" style={{ minHeight: '40px' }}>
+                        <Link
+                          href={actionHref}
+                          className="primary-button"
+                          style={{ minHeight: '40px', width: isMobile ? '100%' : 'fit-content' }}
+                        >
                           {ownsEvent ? 'Manage Event' : 'View Event'}
                           <ArrowRight size={16} />
                         </Link>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'flex-end' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isMobile ? 'stretch' : 'flex-end',
+                        minWidth: 0,
+                      }}
+                    >
                       <EventCover event={event} />
                     </div>
                   </div>
@@ -824,8 +845,10 @@ export default function BrowseEventsPageClient() {
 
 const rowStyle: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '10px',
   fontSize: '0.96rem',
   fontWeight: 600,
+  minWidth: 0,
+  lineHeight: 1.45,
 };

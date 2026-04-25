@@ -16,7 +16,7 @@ export default function PageHeader({
 }: React.PropsWithChildren<PageHeaderTypes>) {
   return (
     <header className={cn('mb-6 @container xs:-mt-2 lg:mb-7', className)}>
-      <div className="flex flex-col @lg:flex-row @lg:items-center @lg:justify-between">
+      <div className="flex flex-col gap-4 @lg:flex-row @lg:items-center @lg:justify-between">
         <div>
           <Title
             as="h2"
@@ -40,7 +40,7 @@ export default function PageHeader({
             ))}
           </Breadcrumb>
         </div>
-        {children}
+        {children ? <div className="self-start @lg:self-auto">{children}</div> : null}
       </div>
     </header>
   );

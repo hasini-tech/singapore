@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
+import { useMedia } from '@/hooks/use-media';
 
 type CategoryId = 'startup' | 'business' | 'tech';
 
@@ -334,6 +335,7 @@ function scrollToSection(sectionId: string) {
 }
 
 export default function DiscoverPageClient() {
+  const isMobile = useMedia('(max-width: 768px)', false);
   const [events, setEvents] = useState<DiscoverEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -556,9 +558,9 @@ export default function DiscoverPageClient() {
       <section
         id="discover-categories"
         className="page-shell"
-        style={{ paddingTop: '36px', paddingBottom: '34px' }}
+        style={{ paddingTop: isMobile ? '24px' : '36px', paddingBottom: isMobile ? '24px' : '34px' }}
       >
-        <div style={sectionHeadingRowStyle}>
+        <div style={{ ...sectionHeadingRowStyle, alignItems: isMobile ? 'stretch' : 'flex-end' }}>
           <div style={{ display: 'grid', gap: '8px' }}>
             <span className="eyebrow" style={{ width: 'fit-content' }}>
               <Sparkles size={16} />
@@ -569,6 +571,9 @@ export default function DiscoverPageClient() {
               Every category card narrows the feed instantly so users can jump from curiosity to a
               relevant shortlist.
             </p>
+            {isMobile && categoryCards.length > 1 ? (
+              <p style={carouselHintStyle}>Swipe to browse categories</p>
+            ) : null}
           </div>
 
           {(selectedCategory !== 'all' || activeCalendarKey || searchQuery.trim()) && (
@@ -579,6 +584,7 @@ export default function DiscoverPageClient() {
                 setActiveCalendarKey(null);
                 setSearchQuery('');
               }}
+              className="discover-action-button"
               style={clearButtonStyle}
             >
               Reset filters
@@ -623,6 +629,7 @@ export default function DiscoverPageClient() {
 
                 <div style={{ display: 'grid', gap: '10px' }}>
                   <div
+                    className="discover-category-title-row"
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -650,8 +657,12 @@ export default function DiscoverPageClient() {
         </div>
       </section>
 
-      <section id="discover-events" className="page-shell" style={{ paddingBottom: '34px' }}>
-        <div style={sectionHeadingRowStyle}>
+      <section
+        id="discover-events"
+        className="page-shell"
+        style={{ paddingBottom: isMobile ? '24px' : '34px' }}
+      >
+        <div style={{ ...sectionHeadingRowStyle, alignItems: isMobile ? 'stretch' : 'flex-end' }}>
           <div style={{ display: 'grid', gap: '8px' }}>
             <span className="eyebrow" style={{ width: 'fit-content' }}>
               <CalendarDays size={16} />
@@ -662,6 +673,9 @@ export default function DiscoverPageClient() {
               Cards surface date, host, location, pricing, and guest momentum without making people
               hunt for details.
             </p>
+            {isMobile && filteredEvents.length > 1 ? (
+              <p style={carouselHintStyle}>Swipe to browse events</p>
+            ) : null}
           </div>
         </div>
 
@@ -715,10 +729,14 @@ export default function DiscoverPageClient() {
 
               return (
                 <article key={event.id} className="discover-event-card surface-panel">
-                  <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '24px' }}>
+                  <div
+                    className="discover-event-image-wrap"
+                    style={{ position: 'relative', overflow: 'hidden', borderRadius: isMobile ? '18px' : '24px' }}
+                  >
                     <img
                       src={event.cover_image || DEFAULT_EVENT_COVER}
                       alt={event.title}
+                      className="evently-image discover-event-image"
                       style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                     />
                     <div
@@ -749,6 +767,7 @@ export default function DiscoverPageClient() {
                   <div style={{ display: 'grid', gap: '14px' }}>
                     <div style={{ display: 'grid', gap: '8px' }}>
                       <div
+                        className="discover-event-header"
                         style={{
                           display: 'flex',
                           justifyContent: 'space-between',
@@ -795,6 +814,7 @@ export default function DiscoverPageClient() {
                     </div>
 
                     <div
+                      className="discover-event-footer"
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -808,7 +828,7 @@ export default function DiscoverPageClient() {
                       </div>
                       <Link
                         href={`/events/${event.slug}`}
-                        className="secondary-button"
+                        className="secondary-button discover-action-button"
                         style={{ minHeight: '46px' }}
                       >
                         View Event
@@ -822,8 +842,12 @@ export default function DiscoverPageClient() {
         )}
       </section>
 
-      <section id="featured-calendars" className="page-shell" style={{ paddingBottom: '34px' }}>
-        <div style={sectionHeadingRowStyle}>
+      <section
+        id="featured-calendars"
+        className="page-shell"
+        style={{ paddingBottom: isMobile ? '24px' : '34px' }}
+      >
+        <div style={{ ...sectionHeadingRowStyle, alignItems: isMobile ? 'stretch' : 'flex-end' }}>
           <div style={{ display: 'grid', gap: '8px' }}>
             <span className="eyebrow" style={{ width: 'fit-content' }}>
               <Star size={16} />
@@ -834,6 +858,9 @@ export default function DiscoverPageClient() {
               Calendar cards make it easy to feature popular hosts and let users follow the
               collections they want to see again.
             </p>
+            {isMobile && featuredCalendars.length > 1 ? (
+              <p style={carouselHintStyle}>Swipe to explore calendars</p>
+            ) : null}
           </div>
         </div>
 
@@ -844,6 +871,7 @@ export default function DiscoverPageClient() {
             return (
               <article key={calendar.key} className="discover-calendar-card surface-panel">
                 <div
+                  className="discover-calendar-header"
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -870,6 +898,7 @@ export default function DiscoverPageClient() {
 
                   <button
                     type="button"
+                    className="discover-follow-button"
                     onClick={() => toggleCalendarFollow(calendar.key)}
                     style={{
                       ...followButtonStyle,
@@ -921,6 +950,7 @@ export default function DiscoverPageClient() {
 
                 <button
                   type="button"
+                  className="discover-action-button"
                   onClick={() => {
                     setActiveCalendarKey(calendar.key);
                     scrollToSection('discover-events');
@@ -936,8 +966,11 @@ export default function DiscoverPageClient() {
         </div>
       </section>
 
-      <section className="page-shell" style={{ paddingBottom: '82px' }}>
-        <div style={sectionHeadingRowStyle}>
+      <section
+        className="page-shell"
+        style={{ paddingBottom: isMobile ? '64px' : '82px' }}
+      >
+        <div style={{ ...sectionHeadingRowStyle, alignItems: isMobile ? 'stretch' : 'flex-end' }}>
           <div style={{ display: 'grid', gap: '8px' }}>
             <span className="eyebrow" style={{ width: 'fit-content' }}>
               <MapPin size={16} />
@@ -948,8 +981,11 @@ export default function DiscoverPageClient() {
               This section reacts to the city field and timezone, giving users local suggestions
               first and quality online options when nearby supply is thin.
             </p>
+            {isMobile && localEvents.length > 1 ? (
+              <p style={carouselHintStyle}>Swipe to browse nearby picks</p>
+            ) : null}
           </div>
-          <div style={localInfoPillStyle}>
+          <div className="discover-timezone-pill" style={localInfoPillStyle}>
             <Globe2 size={16} color="var(--primary-color)" />
             <span>{timeZone || 'Timezone unavailable'}</span>
           </div>
@@ -960,11 +996,13 @@ export default function DiscoverPageClient() {
             <article key={event.id} className="discover-local-card surface-panel">
               <div style={{ display: 'grid', gap: '14px' }}>
                 <div
+                  className="discover-local-header"
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     gap: '12px',
                     alignItems: 'center',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <span style={metaPillStyle}>{event.is_online ? 'Online friendly' : localLabel}</span>
@@ -996,7 +1034,7 @@ export default function DiscoverPageClient() {
               </div>
               <Link
                 href={`/events/${event.slug}`}
-                className="secondary-button"
+                className="secondary-button discover-action-button"
                 style={{ minHeight: '46px', width: 'fit-content' }}
               >
                 Explore Event
@@ -1103,10 +1141,79 @@ export default function DiscoverPageClient() {
             }
 
             @media (max-width: 780px) {
+              .discover-category-grid,
+              .discover-events-grid,
+              .discover-calendars-grid,
+              .discover-local-grid {
+                grid-template-columns: none !important;
+                grid-auto-flow: column;
+                grid-auto-columns: minmax(84vw, 1fr);
+                overflow-x: auto;
+                overscroll-behavior-x: contain;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+                padding: 2px 2px 10px;
+                margin: 0 -2px;
+                scroll-padding-left: 2px;
+                -webkit-overflow-scrolling: touch;
+              }
+
+              .discover-category-grid::-webkit-scrollbar,
+              .discover-events-grid::-webkit-scrollbar,
+              .discover-calendars-grid::-webkit-scrollbar,
+              .discover-local-grid::-webkit-scrollbar {
+                display: none;
+              }
+
+              .discover-category-grid > *,
+              .discover-events-grid > *,
+              .discover-calendars-grid > *,
+              .discover-local-grid > * {
+                scroll-snap-align: start;
+              }
+
               .discover-search-row,
               .discover-spotlight-meta,
               .discover-stat-grid {
                 grid-template-columns: minmax(0, 1fr) !important;
+              }
+
+              .discover-category-title-row,
+              .discover-event-header,
+              .discover-event-footer,
+              .discover-calendar-header,
+              .discover-local-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+              }
+
+              .discover-follow-button,
+              .discover-timezone-pill {
+                width: 100%;
+                justify-content: flex-start;
+              }
+
+              .discover-event-image {
+                height: 200px !important;
+              }
+            }
+
+            @media (max-width: 640px) {
+              .discover-category-card,
+              .discover-event-card,
+              .discover-calendar-card,
+              .discover-local-card {
+                padding: 14px !important;
+                border-radius: 16px !important;
+              }
+
+              .discover-action-button {
+                width: 100% !important;
+                justify-content: center !important;
+              }
+
+              .discover-event-image {
+                height: 184px !important;
               }
             }
           `,
@@ -1198,6 +1305,13 @@ const sectionCopyStyle: React.CSSProperties = {
   lineHeight: 1.65,
 };
 
+const carouselHintStyle: React.CSSProperties = {
+  margin: 0,
+  color: 'var(--text-tertiary)',
+  fontSize: '0.82rem',
+  fontWeight: 700,
+};
+
 const clearButtonStyle: React.CSSProperties = {
   border: '1px solid var(--border-color)',
   borderRadius: '12px',
@@ -1224,6 +1338,7 @@ const categoryCountPillStyle: React.CSSProperties = {
   background: 'rgba(14,118,120,0.08)',
   fontSize: '0.78rem',
   fontWeight: 700,
+  maxWidth: '100%',
 };
 
 const emptySpotlightStyle: React.CSSProperties = {
@@ -1301,6 +1416,8 @@ const hostLabelStyle: React.CSSProperties = {
   color: 'var(--primary-color)',
   fontWeight: 700,
   fontSize: '0.84rem',
+  maxWidth: '100%',
+  overflowWrap: 'anywhere',
 };
 
 const metaPillStyle: React.CSSProperties = {
@@ -1310,6 +1427,8 @@ const metaPillStyle: React.CSSProperties = {
   color: 'var(--primary-color)',
   fontWeight: 700,
   fontSize: '0.76rem',
+  maxWidth: '100%',
+  overflowWrap: 'anywhere',
 };
 
 const eventDescriptionStyle: React.CSSProperties = {
@@ -1324,10 +1443,11 @@ const eventDescriptionStyle: React.CSSProperties = {
 
 const detailRowStyle: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '8px',
   fontWeight: 600,
   fontSize: '0.92rem',
+  lineHeight: 1.45,
 };
 
 const emptyStateStyle: React.CSSProperties = {
@@ -1385,4 +1505,7 @@ const localInfoPillStyle: React.CSSProperties = {
   color: 'var(--text-secondary)',
   fontWeight: 700,
   fontSize: '0.9rem',
+  maxWidth: '100%',
+  flexWrap: 'wrap',
+  overflowWrap: 'anywhere',
 };
