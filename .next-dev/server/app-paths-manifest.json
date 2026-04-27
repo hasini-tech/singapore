@@ -1,1 +1,8 @@
-{}
+{
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/[...path]/route": "app/api/[...path]/route.js",
+  "/(hydrogen)/create-event/page": "app/(hydrogen)/create-event/page.js",
+  "/(hydrogen)/events/page": "app/(hydrogen)/events/page.js",
+  "/(hydrogen)/events/browse/page": "app/(hydrogen)/events/browse/page.js",
+  "/(hydrogen)/manage/[slug]/page": "app/(hydrogen)/manage/[slug]/page.js"
+}
