@@ -11,6 +11,16 @@ type RouteContext = {
   }>;
 };
 
+type LocalRegistrationQuestion = {
+  id: string;
+  label: string;
+  description: string;
+  type: string;
+  required: boolean;
+  options: string[];
+  platform?: string;
+};
+
 type LocalEvent = {
   id: string;
   title: string;
@@ -46,6 +56,7 @@ type LocalEvent = {
   conversion_rate: number;
   share_url: string;
   created_at: string;
+  registration_questions: LocalRegistrationQuestion[];
 };
 
 type LocalCalendar = {
@@ -357,6 +368,65 @@ function normalizeLocalLinks(value: unknown) {
   return value
     .map((entry) => String(entry || '').trim())
     .filter(Boolean);
+}
+
+function normalizeLocalQuestionOptions(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => String(entry || '').trim())
+      .filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\r?\n|,/)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  return [] as string[];
+}
+
+function normalizeLocalRegistrationQuestions(value: unknown): LocalRegistrationQuestion[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item, index): LocalRegistrationQuestion | null => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const raw = item as Record<string, unknown>;
+      const label = String(
+        raw.label ?? raw.question ?? raw.title ?? raw.name ?? raw.field_label ?? ''
+      ).trim();
+
+      if (!label) {
+        return null;
+      }
+
+      const normalizedQuestion: LocalRegistrationQuestion = {
+        id: String(raw.id ?? raw.key ?? `question-${index + 1}`),
+        label,
+        description: String(
+          raw.description ??
+            raw.helper_text ??
+            raw.subtitle ??
+            raw.placeholder ??
+            raw.collecting ??
+            ''
+        ).trim(),
+        type: String(raw.type ?? raw.field_type ?? raw.kind ?? raw.input_type ?? 'short_text'),
+        required:
+          raw.required === true || String(raw.required ?? '').trim().toLowerCase() === 'true',
+        options: normalizeLocalQuestionOptions(raw.options ?? raw.choices ?? raw.values),
+        platform: String(raw.platform ?? raw.social_platform ?? '').trim() || undefined,
+      };
+      return normalizedQuestion;
+    })
+    .filter((question): question is LocalRegistrationQuestion => Boolean(question));
 }
 
 function getLocalUserById(userId: string) {
@@ -835,6 +905,9 @@ function buildLocalEvent(payload: any, request: NextRequest, selectedCalendar: L
       conversion_rate: 0,
       share_url: `${getFrontendBaseUrl(request)}/events/${slug}`,
       created_at: now,
+      registration_questions: normalizeLocalRegistrationQuestions(
+        payload?.registration_questions ?? payload?.custom_questions ?? payload?.questions
+      ),
     },
     selectedCalendar
   );
@@ -871,6 +944,14 @@ function updateLocalEvent(event: LocalEvent, payload: any) {
     speakers: Array.isArray(payload?.speakers) ? payload.speakers : event.speakers,
     agenda: Array.isArray(payload?.agenda) ? payload.agenda : event.agenda,
     integrations: Array.isArray(payload?.integrations) ? payload.integrations : event.integrations,
+    registration_questions:
+      payload?.registration_questions !== undefined
+        ? normalizeLocalRegistrationQuestions(payload.registration_questions)
+        : payload?.custom_questions !== undefined
+          ? normalizeLocalRegistrationQuestions(payload.custom_questions)
+          : payload?.questions !== undefined
+            ? normalizeLocalRegistrationQuestions(payload.questions)
+            : event.registration_questions,
   };
 
   const persisted = persistLocalEvent(updatedEvent);

@@ -80,6 +80,10 @@ type EventRecord = {
   ticket_sales?: number;
   conversion_rate?: number;
   waitlisted_count?: number;
+  registration_questions?: unknown;
+  custom_questions?: unknown;
+  questions?: unknown;
+  [key: string]: any;
 };
 
 type Insight = { label: string; value: string | number };
@@ -96,6 +100,132 @@ type EditForm = {
   max_seats: number;
   status: string;
 };
+
+type RegistrationQuestionType =
+  | "short_text"
+  | "long_text"
+  | "email"
+  | "phone"
+  | "website"
+  | "checkbox"
+  | "single_select"
+  | "multi_select"
+  | "social_profile"
+  | "company"
+  | "terms";
+
+type SocialPlatform = "linkedin" | "instagram" | "x" | "facebook";
+
+type QuestionEditorKind =
+  | "text"
+  | "options"
+  | "checkbox"
+  | "phone"
+  | "website"
+  | "email"
+  | "company"
+  | "social_profile"
+  | "terms";
+
+type QuestionTypeMeta = {
+  title: string;
+  subtitle: string;
+  placeholder: string;
+  icon: React.ReactNode;
+  helperText?: string;
+  requiredHint?: string;
+};
+
+type RegistrationQuestion = {
+  id: string;
+  label: string;
+  description: string;
+  type: RegistrationQuestionType;
+  required: boolean;
+  options: string[];
+  platform?: SocialPlatform;
+};
+
+type QuestionFormState = {
+  label: string;
+  description: string;
+  type: RegistrationQuestionType;
+  required: boolean;
+  options: string[];
+  optionDraft: string;
+  platform: SocialPlatform;
+};
+
+const QUESTION_TYPE_OPTIONS: Array<{ value: RegistrationQuestionType; label: string }> = [
+  { value: "short_text", label: "Text" },
+  { value: "long_text", label: "Multi-Line Text" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Mobile" },
+  { value: "website", label: "Website" },
+  { value: "social_profile", label: "Social Profile" },
+  { value: "company", label: "Company" },
+  { value: "checkbox", label: "Checkbox" },
+  { value: "single_select", label: "Single Choice" },
+  { value: "multi_select", label: "Multiple Choice" },
+  { value: "terms", label: "Terms" },
+];
+
+const QUESTION_PICKER_TYPES: RegistrationQuestionType[] = [
+  "short_text",
+  "single_select",
+  "social_profile",
+  "checkbox",
+  "phone",
+  "website",
+  "email",
+  "company",
+  "terms",
+];
+
+const SOCIAL_PLATFORM_OPTIONS: Array<{ value: SocialPlatform; label: string }> = [
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "instagram", label: "Instagram" },
+  { value: "x", label: "X" },
+  { value: "facebook", label: "Facebook" },
+];
+
+const QUESTION_TYPES_WITH_OPTIONS = new Set<RegistrationQuestionType>(["single_select", "multi_select"]);
+
+const EMPTY_QUESTION_FORM: QuestionFormState = {
+  label: "",
+  description: "",
+  type: "short_text",
+  required: false,
+  options: [],
+  optionDraft: "",
+  platform: "linkedin",
+};
+
+function normalizeSocialPlatform(value: unknown): SocialPlatform {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  switch (normalized) {
+    case "instagram":
+    case "x":
+    case "facebook":
+    case "linkedin":
+      return normalized as SocialPlatform;
+    default:
+      return "linkedin";
+  }
+}
+
+function buildQuestionFormState(question?: RegistrationQuestion): QuestionFormState {
+  return {
+    label: question?.label || "",
+    description: question?.description || "",
+    type: question?.type || "short_text",
+    required: Boolean(question?.required),
+    options: normalizeQuestionOptions(question?.options),
+    optionDraft: "",
+    platform: normalizeSocialPlatform(question?.platform),
+  };
+}
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -167,6 +297,394 @@ async function copyText(text: string) {
   document.body.removeChild(input);
 }
 
+function createQuestionId() {
+  if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+  return `question-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizeQuestionType(value: unknown): RegistrationQuestionType {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/-/g, "_");
+
+  switch (normalized) {
+    case "textarea":
+    case "paragraph":
+    case "long_text":
+      return "long_text";
+    case "mail":
+      return "email";
+    case "mobile":
+    case "mobile_number":
+    case "phone_number":
+      return "phone";
+    case "url":
+      return "website";
+    case "single":
+    case "single_select":
+    case "single_choice":
+    case "select":
+    case "radio":
+      return "single_select";
+    case "multi":
+    case "multiselect":
+    case "multiple_choice":
+    case "multi_select":
+      return "multi_select";
+    case "bool":
+    case "boolean":
+      return "checkbox";
+    case "organization":
+      return "company";
+    case "social":
+    case "social_profile":
+    case "social_link":
+      return "social_profile";
+    case "agreement":
+      return "terms";
+    case "short_text":
+    case "long_text":
+    case "email":
+    case "phone":
+    case "website":
+    case "checkbox":
+    case "social_profile":
+    case "company":
+    case "terms":
+      return normalized as RegistrationQuestionType;
+    default:
+      return "short_text";
+  }
+}
+
+function getQuestionEditorKind(type: RegistrationQuestionType): QuestionEditorKind {
+  switch (type) {
+    case "short_text":
+    case "long_text":
+      return "text";
+    case "single_select":
+    case "multi_select":
+      return "options";
+    case "checkbox":
+      return "checkbox";
+    case "phone":
+      return "phone";
+    case "website":
+      return "website";
+    case "email":
+      return "email";
+    case "company":
+      return "company";
+    case "social_profile":
+      return "social_profile";
+    case "terms":
+      return "terms";
+    default:
+      return "text";
+  }
+}
+
+function updateQuestionFormType(
+  current: QuestionFormState,
+  nextType: RegistrationQuestionType
+): QuestionFormState {
+  const normalizedType = normalizeQuestionType(nextType);
+  const keepsOptions = QUESTION_TYPES_WITH_OPTIONS.has(normalizedType);
+
+  return {
+    ...current,
+    type: normalizedType,
+    options: keepsOptions ? current.options : [],
+    optionDraft: keepsOptions ? current.optionDraft : "",
+  };
+}
+
+function getQuestionTypeMeta(
+  type: RegistrationQuestionType,
+  platform: SocialPlatform
+): QuestionTypeMeta {
+  const editorKind = getQuestionEditorKind(type);
+
+  switch (editorKind) {
+    case "text":
+      return {
+        title: "Text",
+        subtitle: "Ask for a free-form response",
+        placeholder: "What should guests answer?",
+        icon: <Info size={18} />,
+      };
+    case "options":
+      return {
+        title: "Options",
+        subtitle: "Let the guest choose from a list of options",
+        placeholder: "What should guests answer?",
+        icon: <List size={18} />,
+      };
+    case "checkbox":
+      return {
+        title: "Checkbox",
+        subtitle: "Ask guests to tick a box",
+        placeholder: "What should guests confirm?",
+        icon: <List size={18} />,
+        requiredHint:
+          "When set to Required, guests must tick the box (answer Yes) to proceed. Consider using the Terms question type for event terms.",
+      };
+    case "phone":
+      return {
+        title: "Mobile",
+        subtitle: "Ask for a mobile number",
+        placeholder: "What should guests answer?",
+        icon: <Phone size={18} />,
+        helperText:
+          "Please use the Mobile Number question under the Personal Information section to get the mobile number of the guest.",
+      };
+    case "website":
+      return {
+        title: "Website",
+        subtitle: "Ask for a website URL",
+        placeholder: "What should guests answer?",
+        icon: <LinkIcon size={18} />,
+      };
+    case "email":
+      return {
+        title: "Email",
+        subtitle: "Ask for an email address",
+        placeholder: "What should guests answer?",
+        icon: <Mail size={18} />,
+      };
+    case "company":
+      return {
+        title: "Company",
+        subtitle: "Ask for a company or job title",
+        placeholder: "What should guests answer?",
+        icon: <UserPlus size={18} />,
+      };
+    case "social_profile": {
+      const platformLabel =
+        SOCIAL_PLATFORM_OPTIONS.find((option) => option.value === platform)?.label || "Social";
+      return {
+        title: "Social Profile",
+        subtitle: `Ask for a ${platformLabel} URL or handle`,
+        placeholder: "What should guests answer?",
+        icon: <AtSign size={18} />,
+      };
+    }
+    case "terms":
+      return {
+        title: "Terms",
+        subtitle: "Ask guests to agree before they register",
+        placeholder: "What should guests agree to?",
+        icon: <Lock size={18} />,
+        requiredHint: "Guests usually need to accept this before they can complete registration.",
+      };
+    default:
+      return {
+        title: "Text",
+        subtitle: "Ask for a free-form response",
+        placeholder: "What should guests answer?",
+        icon: <Info size={18} />,
+      };
+  }
+}
+
+function isQuestionPickerSelected(
+  currentType: RegistrationQuestionType,
+  pickerType: RegistrationQuestionType
+) {
+  return getQuestionEditorKind(currentType) === getQuestionEditorKind(pickerType);
+}
+
+function getSocialPlatformIcon(platform: SocialPlatform): React.ReactNode {
+  switch (platform) {
+    case "linkedin":
+      return <Linkedin width={16} height={16} />;
+    case "x":
+      return <Twitter width={16} height={16} />;
+    case "facebook":
+      return <Facebook width={16} height={16} />;
+    default:
+      return <AtSign size={16} />;
+  }
+}
+
+function parseQuestionOptions(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((option) => option.trim())
+    .filter(Boolean);
+}
+
+function normalizeQuestionOptions(value: unknown) {
+  if (!Array.isArray(value)) {
+    if (typeof value === "string") {
+      return parseQuestionOptions(value);
+    }
+    return [] as string[];
+  }
+
+  return value
+    .map((option) => String(option || "").trim())
+    .filter(Boolean);
+}
+
+function normalizeRegistrationQuestions(value: unknown): RegistrationQuestion[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item, index): RegistrationQuestion | null => {
+      if (typeof item === "string") {
+        const label = item.trim();
+        if (!label) return null;
+        const normalizedQuestion: RegistrationQuestion = {
+          id: `question-${index + 1}`,
+          label,
+          description: "",
+          type: "short_text",
+          required: false,
+          options: [],
+        };
+        return normalizedQuestion;
+      }
+
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const raw = item as Record<string, unknown>;
+      const label = String(
+        raw.label ?? raw.question ?? raw.title ?? raw.name ?? raw.field_label ?? ""
+      ).trim();
+
+      if (!label) {
+        return null;
+      }
+
+      const normalizedQuestion: RegistrationQuestion = {
+        id: String(raw.id ?? raw.key ?? `question-${index + 1}`),
+        label,
+        description: String(
+          raw.description ??
+            raw.helper_text ??
+            raw.subtitle ??
+            raw.placeholder ??
+            raw.collecting ??
+            ""
+        ).trim(),
+        type: normalizeQuestionType(raw.type ?? raw.field_type ?? raw.kind ?? raw.input_type),
+        required:
+          raw.required === true || String(raw.required ?? "").trim().toLowerCase() === "true",
+        options: normalizeQuestionOptions(raw.options ?? raw.choices ?? raw.values),
+        platform: normalizeSocialPlatform(raw.platform ?? raw.social_platform),
+      };
+      return normalizedQuestion;
+    })
+    .filter((question): question is RegistrationQuestion => Boolean(question));
+}
+
+function extractRawRegistrationQuestions(event: EventRecord | null) {
+  if (!event) return undefined;
+  return (
+    event.registration_questions ??
+    event.custom_questions ??
+    event.questions ??
+    event.registration?.questions
+  );
+}
+
+function getQuestionStorageKey(eventId?: string) {
+  return eventId ? `growthlab.manage.registration-questions:${eventId}` : "";
+}
+
+function readStoredRegistrationQuestions(eventId?: string) {
+  if (!eventId || typeof window === "undefined") {
+    return [] as RegistrationQuestion[];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(getQuestionStorageKey(eventId));
+    if (!raw) return [];
+    return normalizeRegistrationQuestions(JSON.parse(raw));
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredRegistrationQuestions(eventId: string, questions: RegistrationQuestion[]) {
+  if (!eventId || typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(getQuestionStorageKey(eventId), JSON.stringify(questions));
+  } catch {
+    // Ignore storage failures and keep the in-memory UI working.
+  }
+}
+
+function withRegistrationQuestions(event: EventRecord, questions: RegistrationQuestion[]): EventRecord {
+  return {
+    ...event,
+    registration_questions: questions,
+  };
+}
+
+function hydrateEventQuestions(
+  eventData: EventRecord,
+  fallbackQuestions: RegistrationQuestion[] = []
+) {
+  const apiQuestions = normalizeRegistrationQuestions(extractRawRegistrationQuestions(eventData));
+  const storedQuestions = readStoredRegistrationQuestions(eventData.id);
+  const questions = apiQuestions.length
+    ? apiQuestions
+    : fallbackQuestions.length
+      ? fallbackQuestions
+      : storedQuestions;
+
+  writeStoredRegistrationQuestions(eventData.id, questions);
+
+  return {
+    event: withRegistrationQuestions(eventData, questions),
+    questions,
+  };
+}
+
+function getQuestionTypeLabel(type: RegistrationQuestionType) {
+  return QUESTION_TYPE_OPTIONS.find((option) => option.value === type)?.label || "Short Text";
+}
+
+function getQuestionTypeIcon(type: RegistrationQuestionType) {
+  switch (type) {
+    case "short_text":
+    case "long_text":
+      return <Info size={14} />;
+    case "email":
+      return <Mail size={14} />;
+    case "phone":
+      return <Phone size={14} />;
+    case "website":
+      return <LinkIcon size={14} />;
+    case "social_profile":
+      return <AtSign size={14} />;
+    case "company":
+      return <UserPlus size={14} />;
+    case "checkbox":
+      return <List size={14} />;
+    case "single_select":
+    case "multi_select":
+      return <List size={14} />;
+    case "terms":
+      return <Lock size={14} />;
+    default:
+      return <Info size={14} />;
+  }
+}
+
 export default function ManageEventPage() {
   const router = useRouter();
   const params = useParams();
@@ -190,6 +708,12 @@ export default function ManageEventPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [saving, setSaving] = useState(false);
+  const [customQuestions, setCustomQuestions] = useState<RegistrationQuestion[]>([]);
+  const [questionModalOpen, setQuestionModalOpen] = useState(false);
+  const [questionTypePickerOpen, setQuestionTypePickerOpen] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [questionForm, setQuestionForm] = useState<QuestionFormState>(EMPTY_QUESTION_FORM);
+  const [questionSaving, setQuestionSaving] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -209,37 +733,38 @@ export default function ManageEventPage() {
 
       try {
         const response = await api.get(`/events/manage/${slug}`);
-        const eventData = response.data;
+        const hydrated = hydrateEventQuestions(response.data);
         if (!mounted) return;
-        setEvent(eventData);
-        setEditForm(buildEditForm(eventData));
+        setEvent(hydrated.event);
+        setCustomQuestions(hydrated.questions);
+        setEditForm(buildEditForm(hydrated.event));
 
         // Fetch guests from ticket service
         api
-          .get(`/tickets/event/${eventData.id}`)
+          .get(`/tickets/event/${hydrated.event.id}`)
           .then((res) => mounted && setGuests(res.data || []))
           .catch(() => {});
 
         // Fetch registrations from attendee service
         api
-          .get(`/attendees/event/${eventData.id}`)
+          .get(`/attendees/event/${hydrated.event.id}`)
           .then((res) => mounted && setRegistrations(res.data || []))
           .catch(() => {});
 
         // Fetch blasts (currently simulated or empty)
         api
-          .get(`/blasts?event_id=${eventData.id}`)
+          .get(`/blasts?event_id=${hydrated.event.id}`)
           .then((res) => mounted && setBlasts(res.data || []))
           .catch(() => {});
 
         // Set insights from event metrics instead of a failing dedicated endpoint
         const metrics = [
-          { label: "Confirmed Guests", value: eventData.confirmed_count || 0 },
-          { label: "Total Registrations", value: eventData.attendee_count || 0 },
-          { label: "Checked-in", value: eventData.checked_in_count || 0 },
-          { label: "Ticket Sales", value: `Rs ${eventData.ticket_sales || 0}` },
-          { label: "Conversion Rate", value: `${eventData.conversion_rate || 0}%` },
-          { label: "Waitlisted", value: eventData.waitlisted_count || 0 },
+          { label: "Confirmed Guests", value: hydrated.event.confirmed_count || 0 },
+          { label: "Total Registrations", value: hydrated.event.attendee_count || 0 },
+          { label: "Checked-in", value: hydrated.event.checked_in_count || 0 },
+          { label: "Ticket Sales", value: `Rs ${hydrated.event.ticket_sales || 0}` },
+          { label: "Conversion Rate", value: `${hydrated.event.conversion_rate || 0}%` },
+          { label: "Waitlisted", value: hydrated.event.waitlisted_count || 0 },
         ];
         setInsights(metrics);
       } catch (err: any) {
@@ -321,8 +846,10 @@ export default function ManageEventPage() {
         agenda: (event as any).agenda || [],
       };
       const { data } = await api.put(`/events/${event.id}`, payload);
-      setEvent(data);
-      setEditForm(buildEditForm(data));
+      const hydrated = hydrateEventQuestions(data, customQuestions);
+      setEvent(hydrated.event);
+      setCustomQuestions(hydrated.questions);
+      setEditForm(buildEditForm(hydrated.event));
       setEditOpen(false);
       setMessage("Event details updated.");
     } catch (err: any) {
@@ -331,6 +858,177 @@ export default function ManageEventPage() {
       setSaving(false);
     }
   };
+
+  const resetQuestionForm = () => {
+    setEditingQuestionId(null);
+    setQuestionForm(buildQuestionFormState());
+    setQuestionTypePickerOpen(false);
+    setQuestionSaving(false);
+  };
+
+  const closeQuestionModal = () => {
+    setQuestionModalOpen(false);
+    resetQuestionForm();
+  };
+
+  const openAddQuestionModal = () => {
+    resetQuestionForm();
+    setQuestionTypePickerOpen(true);
+    setQuestionModalOpen(true);
+  };
+
+  const openEditQuestionModal = (question: RegistrationQuestion) => {
+    setEditingQuestionId(question.id);
+    setQuestionForm(buildQuestionFormState(question));
+    setQuestionTypePickerOpen(false);
+    setQuestionModalOpen(true);
+  };
+
+  const handleQuestionTypeChange = (nextType: RegistrationQuestionType) => {
+    setQuestionForm((current) => updateQuestionFormType(current, nextType));
+  };
+
+  const handleQuestionModalBack = () => {
+    if (questionTypePickerOpen) {
+      closeQuestionModal();
+      return;
+    }
+
+    setQuestionTypePickerOpen(true);
+  };
+
+  const addOptionFromDraft = () => {
+    const draft = questionForm.optionDraft.trim();
+    if (!draft) return;
+
+    setQuestionForm((current) => {
+      const exists = current.options.some(
+        (option) => option.trim().toLowerCase() === draft.toLowerCase()
+      );
+
+      if (exists) {
+        return {
+          ...current,
+          optionDraft: "",
+        };
+      }
+
+      return {
+        ...current,
+        options: [...current.options, draft],
+        optionDraft: "",
+      };
+    });
+  };
+
+  const removeQuestionOption = (optionToRemove: string) => {
+    setQuestionForm((current) => ({
+      ...current,
+      options: current.options.filter((option) => option !== optionToRemove),
+    }));
+  };
+
+  const handleOptionDraftKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter" && e.key !== "Tab") {
+      return;
+    }
+
+    e.preventDefault();
+    addOptionFromDraft();
+  };
+
+  const persistQuestions = async (
+    nextQuestions: RegistrationQuestion[],
+    successMessage: string,
+    fallbackMessage: string
+  ) => {
+    if (!event) return;
+
+    setCustomQuestions(nextQuestions);
+    setEvent(withRegistrationQuestions(event, nextQuestions));
+    writeStoredRegistrationQuestions(event.id, nextQuestions);
+
+    try {
+      const { data } = await api.put(`/events/${event.id}`, {
+        registration_questions: nextQuestions,
+      });
+      const hydrated = hydrateEventQuestions(data, nextQuestions);
+      setEvent(hydrated.event);
+      setCustomQuestions(hydrated.questions);
+      setEditForm((current) => (current ? buildEditForm(hydrated.event) : current));
+      setMessage(successMessage);
+    } catch (err: any) {
+      setMessage(err?.response?.data?.detail || fallbackMessage);
+    }
+  };
+
+  const saveQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!event) return;
+
+    const label = questionForm.label.trim();
+    if (!label) {
+      setMessage("Question title is required.");
+      return;
+    }
+
+    const options = normalizeQuestionOptions([
+      ...questionForm.options,
+      questionForm.optionDraft,
+    ]);
+    if (QUESTION_TYPES_WITH_OPTIONS.has(questionForm.type) && options.length === 0) {
+      setMessage("Add at least one option for this question.");
+      return;
+    }
+
+    const nextQuestion: RegistrationQuestion = {
+      id: editingQuestionId || createQuestionId(),
+      label,
+      description: questionForm.description.trim(),
+      type: questionForm.type,
+      required: questionForm.required,
+      options,
+      platform:
+        questionForm.type === "social_profile" ? questionForm.platform : undefined,
+    };
+
+    const nextQuestions = editingQuestionId
+      ? customQuestions.map((question) =>
+          question.id === editingQuestionId ? nextQuestion : question
+        )
+      : [...customQuestions, nextQuestion];
+
+    setQuestionSaving(true);
+    await persistQuestions(
+      nextQuestions,
+      editingQuestionId ? "Question updated." : "Question added.",
+      editingQuestionId
+        ? "Question updated locally. Sync with the event service failed."
+        : "Question added locally. Sync with the event service failed."
+    );
+    closeQuestionModal();
+  };
+
+  const deleteQuestion = async (questionId: string, label: string) => {
+    if (!event) return;
+    if (typeof window !== "undefined" && !window.confirm(`Delete "${label}"?`)) {
+      return;
+    }
+
+    const nextQuestions = customQuestions.filter((question) => question.id !== questionId);
+    await persistQuestions(
+      nextQuestions,
+      "Question removed.",
+      "Question removed locally. Sync with the event service failed."
+    );
+  };
+
+  const questionTypeMeta = getQuestionTypeMeta(questionForm.type, questionForm.platform);
+  const questionEditorKind = getQuestionEditorKind(questionForm.type);
+  const isTextQuestion = questionEditorKind === "text";
+  const isOptionsQuestion = questionEditorKind === "options";
+  const showQuestionHelperText =
+    questionEditorKind !== "checkbox" && questionTypeMeta.helperText;
 
   if (loading) {
     return <PageShell><div style={{ minHeight: "40vh", display: "grid", placeItems: "center" }}><Loader2 className="animate-spin" size={34} color="var(--primary-color)" /></div></PageShell>;
@@ -654,7 +1352,28 @@ export default function ManageEventPage() {
               </div>
 
               <div>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, margin: "0 0 16px" }}>Registration Questions</h3>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 16 }}>
+                  <div>
+                    <h3 style={{ fontSize: "1.2rem", fontWeight: 800, margin: "0 0 6px" }}>Registration Questions</h3>
+                    <p style={{ color: "var(--manage-muted)", fontSize: "0.92rem", margin: 0 }}>
+                      Add custom questions and they will appear here in the registration UI.
+                    </p>
+                  </div>
+                  <button
+                    onClick={openAddQuestionModal}
+                    style={{
+                      ...pillBtn,
+                      background: "var(--manage-hover)",
+                      boxShadow: "none",
+                      borderRadius: 10,
+                      padding: "9px 14px",
+                      width: isMobile ? "100%" : "auto",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Plus size={16} /> Add Question
+                  </button>
+                </div>
                 <div style={{ display: "grid", gap: 24 }}>
                    <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, marginBottom: 12, color: "#16a34a" }}>
@@ -674,6 +1393,76 @@ export default function ManageEventPage() {
                          <div style={questionBox}>ETH Address <span style={{ marginLeft: "auto", color: "var(--manage-muted)" }}>Off</span></div>
                          <div style={questionBox}>SOL Address <span style={{ marginLeft: "auto", color: "var(--manage-muted)" }}>Off</span></div>
                       </div>
+                   </div>
+                   <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 12, flexDirection: isMobile ? "column" : "row", marginBottom: 12 }}>
+                         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, color: "#0f766e" }}>
+                            <List size={18} /> Custom Questions
+                         </div>
+                         <div style={{ color: "var(--manage-muted)", fontSize: "0.86rem" }}>
+                            {customQuestions.length} question{customQuestions.length === 1 ? "" : "s"}
+                         </div>
+                      </div>
+
+                      {customQuestions.length === 0 ? (
+                        <div style={questionEmptyState}>
+                          No custom questions yet. Add one and it will show here right away.
+                        </div>
+                      ) : (
+                        <div style={{ display: "grid", gap: 12 }}>
+                          {customQuestions.map((question) => (
+                            <div key={question.id} style={questionRowCard}>
+                              <div style={questionHandle}>
+                                <List size={16} />
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: "1rem", fontWeight: 700, color: "var(--manage-fg)" }}>
+                                  {question.label}
+                                </div>
+                                {question.description ? (
+                                  <div style={{ color: "var(--manage-muted)", fontSize: "0.9rem", marginTop: 4 }}>
+                                    {question.description}
+                                  </div>
+                                ) : null}
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                                  <span style={questionMetaPill}>
+                                    {getQuestionTypeIcon(question.type)}
+                                    {getQuestionTypeLabel(question.type)}
+                                  </span>
+                                  {question.options.length > 0 ? (
+                                    <span style={questionMetaPill}>
+                                      {question.options.length} option{question.options.length === 1 ? "" : "s"}
+                                    </span>
+                                  ) : null}
+                                  {question.required ? (
+                                    <span style={{ ...questionMetaPill, color: "#16a34a" }}>
+                                      Required
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", gap: 8, alignSelf: isMobile ? "flex-start" : "center" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditQuestionModal(question)}
+                                  style={questionActionBtn}
+                                  aria-label={`Edit ${question.label}`}
+                                >
+                                  <PencilLine size={15} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => deleteQuestion(question.id, question.label)}
+                                  style={questionActionBtn}
+                                  aria-label={`Delete ${question.label}`}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                    </div>
                 </div>
               </div>
@@ -997,6 +1786,218 @@ export default function ManageEventPage() {
           </form>
         </Modal>
       )}
+
+      {questionModalOpen && (
+        <Modal
+          title=""
+          subtitle=""
+          onClose={closeQuestionModal}
+          hideHeader
+          width="min(96vw, 520px)"
+          bodyStyle={{ padding: 0, maxHeight: "calc(100vh - 24px)", overflowY: "auto" }}
+        >
+          {questionTypePickerOpen ? (
+            <div style={questionBuilderShell}>
+              <div style={questionBuilderTopBar}>
+                <button type="button" onClick={handleQuestionModalBack} style={questionBuilderTopAction}>
+                  <ArrowLeft size={16} />
+                </button>
+                <div style={questionBuilderTitle}>Add Question</div>
+                <button type="button" onClick={closeQuestionModal} style={questionBuilderTopAction}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={{ padding: 16 }}>
+                <div style={questionTypePickerGrid}>
+                  {QUESTION_PICKER_TYPES.map((type) => {
+                    const typeMeta = getQuestionTypeMeta(type, questionForm.platform);
+                    const active = isQuestionPickerSelected(questionForm.type, type);
+
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          handleQuestionTypeChange(type);
+                          setQuestionTypePickerOpen(false);
+                        }}
+                        style={active ? questionTypePickerCardActive : questionTypePickerCard}
+                      >
+                        <div style={questionTypePickerIcon}>{typeMeta.icon}</div>
+                        <div style={{ textAlign: "left" }}>
+                          <div style={questionTypePickerTitle}>{typeMeta.title}</div>
+                          <div style={questionTypePickerSubtitle}>{typeMeta.subtitle}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={saveQuestion} style={questionBuilderShell}>
+              <div style={questionBuilderTopBar}>
+                <button type="button" onClick={handleQuestionModalBack} style={questionBuilderTopAction}>
+                  <ArrowLeft size={16} />
+                </button>
+                <div style={questionBuilderTitle}>
+                  {editingQuestionId ? "Edit Question" : "Add Question"}
+                </div>
+                <button type="button" onClick={closeQuestionModal} style={questionBuilderTopAction}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={questionTypeHero}>
+                <div style={questionTypeHeroIcon}>{questionTypeMeta.icon}</div>
+                <div>
+                  <div style={questionTypeHeroTitle}>{questionTypeMeta.title}</div>
+                  <div style={questionTypeHeroSubtitle}>{questionTypeMeta.subtitle}</div>
+                </div>
+              </div>
+
+              <div style={questionBuilderBody}>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={questionBuilderFieldLabel}>Question</div>
+                  <input
+                    value={questionForm.label}
+                    onChange={(e) => setQuestionForm({ ...questionForm, label: e.target.value })}
+                    required
+                    style={questionBuilderInput}
+                    placeholder={questionTypeMeta.placeholder}
+                  />
+                </div>
+
+                {showQuestionHelperText ? (
+                  <div style={questionBuilderHelperText}>{questionTypeMeta.helperText}</div>
+                ) : null}
+
+                {isTextQuestion && (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    <div style={questionBuilderFieldLabel}>Response Length</div>
+                    <SegmentedControl
+                      options={[
+                        { value: "short_text", label: "Short", icon: <Info size={14} /> },
+                        { value: "long_text", label: "Multi-Line", icon: <List size={14} /> },
+                      ]}
+                      value={questionForm.type}
+                      onChange={(value) =>
+                        handleQuestionTypeChange(value as RegistrationQuestionType)
+                      }
+                    />
+                  </div>
+                )}
+
+                {isOptionsQuestion && (
+                  <>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <div style={questionBuilderFieldLabel}>Options</div>
+                      <input
+                        value={questionForm.optionDraft}
+                        onChange={(e) =>
+                          setQuestionForm({ ...questionForm, optionDraft: e.target.value })
+                        }
+                        onKeyDown={handleOptionDraftKeyDown}
+                        onBlur={addOptionFromDraft}
+                        style={questionBuilderInput}
+                        placeholder="Add options"
+                      />
+                      <div style={questionBuilderHelperText}>
+                        Press Enter or Tab key to add a new option.
+                      </div>
+                      {questionForm.options.length > 0 ? (
+                        <div style={questionOptionChipRow}>
+                          {questionForm.options.map((option) => (
+                            <span key={option} style={questionOptionChip}>
+                              {option}
+                              <button
+                                type="button"
+                                onClick={() => removeQuestionOption(option)}
+                                style={questionOptionChipRemove}
+                                aria-label={`Remove ${option}`}
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div style={{ display: "grid", gap: 10 }}>
+                      <div style={questionBuilderFieldLabel}>Selection Type</div>
+                      <SegmentedControl
+                        options={[
+                          { value: "single_select", label: "Single", icon: <List size={14} /> },
+                          { value: "multi_select", label: "Multiple", icon: <List size={14} /> },
+                        ]}
+                        value={questionForm.type}
+                        onChange={(value) =>
+                          handleQuestionTypeChange(value as RegistrationQuestionType)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+
+                {questionEditorKind === "social_profile" && (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    <div style={questionBuilderFieldLabel}>Platform</div>
+                    <div style={questionPlatformRow}>
+                      {SOCIAL_PLATFORM_OPTIONS.map((platform) => {
+                        const active = questionForm.platform === platform.value;
+                        return (
+                          <button
+                            key={platform.value}
+                            type="button"
+                            onClick={() =>
+                              setQuestionForm({ ...questionForm, platform: platform.value })
+                            }
+                            style={active ? questionPlatformPillActive : questionPlatformPill}
+                          >
+                            {getSocialPlatformIcon(platform.value)}
+                            {platform.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={questionSwitchRow}>
+                    <div style={questionBuilderRequiredLabel}>Required</div>
+                    <SwitchToggle
+                      checked={questionForm.required}
+                      onChange={(checked) =>
+                        setQuestionForm({ ...questionForm, required: checked })
+                      }
+                    />
+                  </div>
+
+                  {questionTypeMeta.requiredHint ? (
+                    <div style={questionBuilderHelperText}>{questionTypeMeta.requiredHint}</div>
+                  ) : null}
+                </div>
+
+                <button type="submit" disabled={questionSaving} style={questionBuilderSubmit}>
+                  {questionSaving ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <Plus size={16} />
+                  )}
+                  {questionSaving
+                    ? "Saving..."
+                    : editingQuestionId
+                      ? "Save Question"
+                      : "Add Question"}
+                </button>
+              </div>
+            </form>
+          )}
+        </Modal>
+      )}
     </PageShell>
   );
 }
@@ -1084,8 +2085,78 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   return <div style={{ background: "var(--manage-card)", borderRadius: 18, padding: 18, border: "1px solid var(--manage-card-border)", boxShadow: "0 10px 20px rgba(0,0,0,0.04)", ...style }}>{children}</div>;
 }
 
-function Modal({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: React.ReactNode; }) {
-  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", display: "grid", placeItems: "center", padding: 12, zIndex: 200 }}><div style={{ width: "min(96vw, 560px)", maxHeight: "calc(100vh - 24px)", background: "var(--manage-card)", borderRadius: 24, border: "1px solid var(--manage-card-border)", boxShadow: "0 26px 56px rgba(0,0,0,0.16)", overflow: "hidden" }}><div style={{ padding: "18px 20px 14px", borderBottom: "1px solid var(--manage-card-border)", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}><div><div style={{ fontSize: "1.15rem", fontWeight: 800, color:"var(--manage-fg)" }}>{title}</div><div style={{ color: "var(--manage-muted)", marginTop: 6, fontSize: "0.92rem" }}>{subtitle}</div></div><button onClick={onClose} style={{ border: "none", background: "transparent", color: "var(--manage-muted)", cursor: "pointer" }}><X size={20} /></button></div><div style={{ padding: 20, maxHeight: "calc(100vh - 140px)", overflowY: "auto" }}>{children}</div></div></div>;
+function Modal({
+  title,
+  subtitle,
+  onClose,
+  children,
+  hideHeader = false,
+  width = "min(96vw, 560px)",
+  bodyStyle,
+}: {
+  title: string;
+  subtitle: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  hideHeader?: boolean;
+  width?: string;
+  bodyStyle?: React.CSSProperties;
+}) {
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", display: "grid", placeItems: "center", padding: 12, zIndex: 200 }}><div style={{ width, maxHeight: "calc(100vh - 24px)", background: "var(--manage-card)", borderRadius: 24, border: "1px solid var(--manage-card-border)", boxShadow: "0 26px 56px rgba(0,0,0,0.16)", overflow: "hidden" }}>{!hideHeader && <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid var(--manage-card-border)", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}><div><div style={{ fontSize: "1.15rem", fontWeight: 800, color:"var(--manage-fg)" }}>{title}</div><div style={{ color: "var(--manage-muted)", marginTop: 6, fontSize: "0.92rem" }}>{subtitle}</div></div><button onClick={onClose} style={{ border: "none", background: "transparent", color: "var(--manage-muted)", cursor: "pointer" }}><X size={20} /></button></div>}<div style={{ padding: 20, maxHeight: "calc(100vh - 140px)", overflowY: "auto", ...bodyStyle }}>{children}</div></div></div>;
+}
+
+function SegmentedControl({
+  options,
+  value,
+  onChange,
+}: {
+  options: Array<{ value: string; label: string; icon?: React.ReactNode }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div style={segmentedControlWrap}>
+      {options.map((option) => {
+        const active = option.value === value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            style={active ? segmentedControlOptionActive : segmentedControlOption}
+          >
+            {option.icon}
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SwitchToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      style={{
+        ...switchTrack,
+        justifyContent: checked ? "flex-end" : "flex-start",
+        background: checked ? "var(--manage-fg)" : "#d4d4d8",
+      }}
+    >
+      <span style={switchThumb} />
+    </button>
+  );
 }
 
 const metaChip: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: 999, background: "var(--manage-card)", border: "1px solid var(--manage-card-border)", fontWeight: 700, fontSize: "0.82rem", color: "var(--manage-fg)" };
@@ -1106,6 +2177,43 @@ const tinyBtn: React.CSSProperties = { padding: "7px 10px", borderRadius: 10, ba
 const iconCircleSmall: React.CSSProperties = { width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" };
 const quickActionCardSmall: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "var(--manage-card)", color: "var(--manage-fg)", borderRadius: 14, border: "1px solid var(--manage-card-border)", cursor: "pointer" };
 const questionBox: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", background: "var(--manage-hover)", borderRadius: 12, fontSize: "0.86rem", color: "var(--manage-muted)", border: "1px solid var(--manage-card-border)" };
+const questionEmptyState: React.CSSProperties = { padding: "18px 16px", borderRadius: 16, border: "1px dashed var(--manage-card-border)", background: "var(--manage-hover)", color: "var(--manage-muted)", fontSize: "0.92rem" };
+const questionRowCard: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap", padding: "16px 18px", borderRadius: 18, background: "var(--manage-card)", border: "1px solid var(--manage-card-border)", boxShadow: "0 8px 18px rgba(0,0,0,0.03)" };
+const questionHandle: React.CSSProperties = { width: 34, height: 34, borderRadius: 10, background: "var(--manage-hover)", color: "var(--manage-muted)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--manage-card-border)", flexShrink: 0 };
+const questionMetaPill: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", borderRadius: 999, background: "var(--manage-hover)", border: "1px solid var(--manage-card-border)", color: "var(--manage-muted)", fontSize: "0.82rem", fontWeight: 700 };
+const questionActionBtn: React.CSSProperties = { width: 34, height: 34, borderRadius: 10, border: "1px solid var(--manage-card-border)", background: "var(--manage-card)", color: "var(--manage-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
+const questionBuilderShell: React.CSSProperties = { display: "grid", gap: 0 };
+const questionBuilderTopBar: React.CSSProperties = { display: "grid", gridTemplateColumns: "40px 1fr 40px", alignItems: "center", gap: 12, padding: "12px 14px 10px" };
+const questionBuilderTopAction: React.CSSProperties = { width: 30, height: 30, borderRadius: "50%", border: "none", background: "var(--manage-hover)", color: "var(--manage-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
+const questionBuilderTitle: React.CSSProperties = { textAlign: "center", fontSize: "1.05rem", fontWeight: 800, color: "var(--manage-fg)" };
+const questionTypeHero: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 14, padding: "12px 20px 18px", borderBottom: "1px solid var(--manage-card-border)" };
+const questionTypeHeroIcon: React.CSSProperties = { width: 34, height: 34, borderRadius: 10, background: "var(--manage-hover)", color: "var(--manage-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
+const questionTypeHeroTitle: React.CSSProperties = { fontSize: "1rem", fontWeight: 700, color: "var(--manage-fg)" };
+const questionTypeHeroSubtitle: React.CSSProperties = { marginTop: 2, color: "var(--manage-muted)", fontSize: "0.94rem", lineHeight: 1.4 };
+const questionBuilderBody: React.CSSProperties = { display: "grid", gap: 18, padding: "18px 20px 20px" };
+const questionBuilderFieldLabel: React.CSSProperties = { color: "var(--manage-fg)", fontSize: "0.98rem", fontWeight: 700 };
+const questionBuilderInput: React.CSSProperties = { width: "100%", padding: "11px 12px", borderRadius: 10, border: "1px solid var(--manage-card-border)", background: "var(--manage-input)", color: "var(--manage-fg)", fontSize: "0.98rem" };
+const questionBuilderHelperText: React.CSSProperties = { color: "var(--manage-muted)", fontSize: "0.9rem", lineHeight: 1.45 };
+const questionBuilderRequiredLabel: React.CSSProperties = { fontSize: "0.98rem", fontWeight: 700, color: "var(--manage-fg)" };
+const questionBuilderSubmit: React.CSSProperties = { width: "100%", padding: "13px 16px", borderRadius: 10, border: "none", background: "#3f3f46", color: "#ffffff", fontWeight: 800, fontSize: "1rem", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 };
+const questionSwitchRow: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 };
+const segmentedControlWrap: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 0, padding: 3, borderRadius: 12, background: "var(--manage-hover)", border: "1px solid var(--manage-card-border)" };
+const segmentedControlOption: React.CSSProperties = { minHeight: 40, borderRadius: 10, border: "none", background: "transparent", color: "var(--manage-muted)", fontWeight: 700, fontSize: "0.98rem", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" };
+const segmentedControlOptionActive: React.CSSProperties = { ...segmentedControlOption, background: "var(--manage-card)", color: "var(--manage-fg)", boxShadow: "0 1px 2px rgba(0,0,0,0.08)" };
+const switchTrack: React.CSSProperties = { width: 44, height: 26, borderRadius: 999, border: "none", padding: 3, display: "inline-flex", alignItems: "center", cursor: "pointer", transition: "all 0.2s ease" };
+const switchThumb: React.CSSProperties = { width: 20, height: 20, borderRadius: "50%", background: "#ffffff", boxShadow: "0 1px 2px rgba(15,23,42,0.18)" };
+const questionOptionChipRow: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8 };
+const questionOptionChip: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999, background: "var(--manage-hover)", color: "var(--manage-fg)", border: "1px solid var(--manage-card-border)", fontSize: "0.88rem", fontWeight: 600 };
+const questionOptionChipRemove: React.CSSProperties = { width: 18, height: 18, borderRadius: "50%", border: "none", background: "transparent", color: "var(--manage-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 };
+const questionPlatformRow: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8 };
+const questionPlatformPill: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: 999, border: "1px solid var(--manage-card-border)", background: "var(--manage-card)", color: "var(--manage-muted)", fontWeight: 700, cursor: "pointer" };
+const questionPlatformPillActive: React.CSSProperties = { ...questionPlatformPill, background: "var(--manage-hover)", color: "var(--manage-fg)", border: "1px solid var(--manage-fg)" };
+const questionTypePickerGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 };
+const questionTypePickerCard: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", borderRadius: 16, border: "1px solid var(--manage-card-border)", background: "var(--manage-card)", color: "var(--manage-fg)", cursor: "pointer", textAlign: "left" };
+const questionTypePickerCardActive: React.CSSProperties = { ...questionTypePickerCard, border: "1px solid var(--manage-fg)", background: "var(--manage-hover)" };
+const questionTypePickerIcon: React.CSSProperties = { width: 34, height: 34, borderRadius: 10, background: "var(--manage-hover)", color: "var(--manage-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
+const questionTypePickerTitle: React.CSSProperties = { fontSize: "0.96rem", fontWeight: 700, color: "var(--manage-fg)" };
+const questionTypePickerSubtitle: React.CSSProperties = { marginTop: 2, color: "var(--manage-muted)", fontSize: "0.87rem", lineHeight: 1.4 };
 const blastIcon: React.CSSProperties = { position: "absolute", width: 34, height: 34, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.05)" };
 const systemMsgRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "10px 0" };
 const trafficRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "10px 0" };

@@ -21,20 +21,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(hydrogen)/layout.js"
     ],
-    "/(hydrogen)/create-event/page": [
+    "/(hydrogen)/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(hydrogen)/create-event/page.js"
-    ],
-    "/_not-found/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
-    ],
-    "/api/[...path]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/[...path]/route.js"
+      "static/chunks/app/(hydrogen)/page.js"
     ],
     "/(hydrogen)/events/page": [
       "static/chunks/webpack.js",
@@ -45,6 +35,26 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(hydrogen)/events/browse/page.js"
+    ],
+    "/api/[...path]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/[...path]/route.js"
+    ],
+    "/(hydrogen)/create-event/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(hydrogen)/create-event/page.js"
+    ],
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
+    ],
+    "/(hydrogen)/luma/events/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(hydrogen)/luma/events/page.js"
     ],
     "/(hydrogen)/manage/[slug]/page": [
       "static/chunks/webpack.js",
