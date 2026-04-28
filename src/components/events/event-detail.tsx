@@ -187,7 +187,7 @@ export default function EventDetail({ event }: { event: GrowthLabEvent }) {
                 Create event
               </Link>
               <Link
-                href={routes.eventCalendar}
+                href={routes.calendars}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-muted bg-background/90 px-6 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-gray-50"
               >
                 Open calendar

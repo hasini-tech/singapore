@@ -1,11 +1,9 @@
 {
-  "/api/[...path]/route": "app/api/[...path]/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/[...path]/route": "app/api/[...path]/route.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/(hydrogen)/page": "app/(hydrogen)/page.js",
-  "/(hydrogen)/events/page": "app/(hydrogen)/events/page.js",
-  "/(hydrogen)/events/browse/page": "app/(hydrogen)/events/browse/page.js",
-  "/(hydrogen)/create-event/page": "app/(hydrogen)/create-event/page.js",
+  "/(hydrogen)/calendars/page": "app/(hydrogen)/calendars/page.js",
+  "/(hydrogen)/calendars/[slug]/page": "app/(hydrogen)/calendars/[slug]/page.js",
   "/(hydrogen)/luma/events/page": "app/(hydrogen)/luma/events/page.js",
-  "/(hydrogen)/manage/[slug]/page": "app/(hydrogen)/manage/[slug]/page.js"
+  "/(hydrogen)/discover/page": "app/(hydrogen)/discover/page.js"
 }

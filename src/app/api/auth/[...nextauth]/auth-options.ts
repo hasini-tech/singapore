@@ -5,6 +5,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import LinkedInProvider from 'next-auth/providers/linkedin';
 import { env } from '@/env.mjs';
 import { decodeNextAuthJwt, getNextAuthSecret } from '@/utils/nextauth-secret';
+import { ensureNextAuthUrl } from '@/utils/nextauth-url';
 import { pagesOptions } from './pages-options';
 
 type LoginCredentials = {
@@ -178,27 +179,9 @@ function getConfiguredOAuthProviders(): AuthProvider[] {
   return providers;
 }
 
-function getResolvedNextAuthUrl() {
-  const explicitUrl = process.env.NEXTAUTH_URL?.trim();
-  if (explicitUrl) {
-    return explicitUrl;
-  }
-
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  return 'http://localhost:3000';
-}
-
 const oauthProviders = getConfiguredOAuthProviders();
 const nextAuthSecret = getNextAuthSecret();
-const nextAuthUrl = getResolvedNextAuthUrl();
-
-if (!process.env.NEXTAUTH_URL) {
-  process.env.NEXTAUTH_URL = nextAuthUrl;
-}
+const nextAuthUrl = ensureNextAuthUrl();
 
 const authProxyBaseUrl = new URL('/api/users', nextAuthUrl).toString();
 

@@ -9440,9 +9440,6 @@ q{
 .\[background\:linear-gradient\(29deg\2c \#0E1012_12\.96\%\2c \#6C4F3E_94\.88\%\)\]{
   background: linear-gradient(29deg,#0E1012 12.96%,#6C4F3E 94.88%);
 }
-.\[grid-template-columns\:repeat\(auto-fit\2c minmax\(260px\2c 1fr\)\)\]{
-  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
-}
 .\[scrollbar-color\:rgba\(0\2c 0\2c 0\2c 0\.2\)_rgba\(0\2c 0\2c 0\2c 0\)\]{
   scrollbar-color: rgba(0,0,0,0.2) rgba(0,0,0,0);
 }
@@ -18040,11 +18037,6 @@ body.hide-nav main.react-calendar__month-view__days__day.min-h-screen.flex-grow 
 
   .sm\:w-auto{
     width: auto;
-  }
-
-  .sm\:w-fit{
-    width: -moz-fit-content;
-    width: fit-content;
   }
 
   .sm\:w-full{

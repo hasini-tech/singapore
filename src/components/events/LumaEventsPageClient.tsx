@@ -16,13 +16,18 @@ import {
   MapPin,
   Ticket,
   Users,
-  X,
 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
+import {
+  lumaListPageColors,
+  lumaListPageFontStack,
+} from '@/config/luma-page-theme';
 import { useMedia } from '@/hooks/use-media';
 import api from '@/lib/api';
 import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
 import { routes } from '@/config/routes';
+
+const C = lumaListPageColors;
 
 type EventFilter = 'upcoming' | 'past';
 type EventMode = 'personal' | 'public';
@@ -454,6 +459,7 @@ function EventDetailDrawer({
   copyFeedback: string;
 }) {
   const isMobile = useMedia('(max-width: 1024px)', false);
+  const showDrawerToolbar = isMobile;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -482,89 +488,102 @@ function EventDetailDrawer({
     <div
       style={{
         position: 'fixed',
-        inset: 0,
+        top: isMobile ? 0 : 76,
+        right: 0,
+        bottom: 0,
+        left: 0,
         zIndex: 80,
-        background: 'rgba(21, 18, 12, 0.18)',
-        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        padding: isMobile ? 0 : '12px 18px 16px',
+        background: isMobile ? C.overlay : C.drawerScrim,
+        backdropFilter: isMobile ? 'blur(8px)' : 'blur(18px) saturate(0.9)',
+        WebkitBackdropFilter: isMobile
+          ? 'blur(8px)'
+          : 'blur(18px) saturate(0.9)',
       }}
       onClick={onClose}
     >
       <aside
         onClick={(eventTarget) => eventTarget.stopPropagation()}
         style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: isMobile ? '100%' : 'min(520px, 100vw)',
-          background: '#fffdf9',
-          borderLeft: isMobile ? 'none' : '1px solid #e8e0d5',
-          boxShadow: '-24px 0 80px rgba(15, 23, 42, 0.14)',
+          position: isMobile ? 'absolute' : 'relative',
+          inset: isMobile ? 0 : 'auto',
+          width: isMobile ? '100%' : 'min(500px, calc(100vw - 36px))',
+          height: '100%',
+          background: C.drawerSurface,
+          border: `1px solid ${C.border}`,
+          borderLeft: isMobile ? 'none' : `1px solid ${C.border}`,
+          borderRadius: isMobile ? 0 : 30,
+          boxShadow: isMobile ? 'none' : C.shadowDrawer,
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 2,
-            padding: '14px 14px 12px',
-            background: 'rgba(255, 253, 249, 0.94)',
-            borderBottom: '1px solid #efe7dc',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={headerIconButtonStyle}
-            >
-              {isMobile ? <ChevronLeft size={16} /> : <X size={16} />}
-            </button>
-            <button type="button" onClick={onCopy} style={headerButtonStyle}>
-              <Copy size={15} />
-              Copy Link
-            </button>
-            <a
-              href={event ? `${routes.events}/${event.slug}` : '#'}
-              target="_blank"
-              rel="noreferrer"
-              style={headerButtonStyle}
-            >
-              Event Page
-              <ExternalLink size={14} />
-            </a>
-            {event?.relationship === 'hosting' && (
-              <Link
-                href={`/manage/${event.slug}`}
-                style={{ ...headerButtonStyle, marginLeft: 'auto' }}
+        {showDrawerToolbar ? (
+          <div
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 2,
+              padding: '14px 14px 12px',
+              background: C.drawerToolbar,
+              borderBottom: `1px solid ${C.drawerToolbarBorder}`,
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={onClose}
+                style={headerIconButtonStyle}
               >
-                Manage
-                <ArrowRight size={14} />
-              </Link>
-            )}
-          </div>
-          {copyFeedback ? (
-            <div
-              style={{
-                marginTop: '10px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                color: '#ba5b76',
-              }}
-            >
-              {copyFeedback}
+                <ChevronLeft size={16} />
+              </button>
+              <button type="button" onClick={onCopy} style={headerButtonStyle}>
+                <Copy size={15} />
+                Copy Link
+              </button>
+              <a
+                href={event ? `${routes.events}/${event.slug}` : '#'}
+                target="_blank"
+                rel="noreferrer"
+                style={headerButtonStyle}
+              >
+                Event Page
+                <ExternalLink size={14} />
+              </a>
+              {event?.relationship === 'hosting' && (
+                <Link
+                  href={`/manage/${event.slug}`}
+                  style={{ ...headerButtonStyle, marginLeft: 'auto' }}
+                >
+                  Manage
+                  <ArrowRight size={14} />
+                </Link>
+              )}
             </div>
-          ) : null}
-        </div>
+            {copyFeedback ? (
+              <div
+                style={{
+                  marginTop: '10px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: C.rose,
+                }}
+              >
+                {copyFeedback}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: isMobile ? '16px 16px 28px' : '18px 18px 36px',
+            padding: isMobile ? '16px 16px 28px' : '12px 18px 32px',
           }}
         >
           {loading && !event ? (
@@ -601,9 +620,9 @@ function EventDetailDrawer({
                     justifyContent: 'space-between',
                     gap: '12px',
                     alignItems: 'center',
-                    borderRadius: '18px',
-                    background: created ? '#ffd6e5' : '#fde2ec',
-                    color: '#c2185b',
+                    borderRadius: '20px',
+                    background: created ? '#ffd7e5' : '#f8d7e3',
+                    color: '#d12f68',
                     padding: '14px 16px',
                     fontWeight: 700,
                   }}
@@ -626,10 +645,10 @@ function EventDetailDrawer({
               <div
                 style={{
                   overflow: 'hidden',
-                  borderRadius: '24px',
+                  borderRadius: '28px',
                   background: '#131313',
-                  minHeight: isMobile ? 260 : 278,
-                  boxShadow: '0 24px 60px rgba(15,23,42,0.15)',
+                  minHeight: isMobile ? 260 : 276,
+                  boxShadow: '0 26px 60px rgba(32,27,22,0.16)',
                 }}
               >
                 <img
@@ -680,7 +699,7 @@ function EventDetailDrawer({
                 }}
               >
                 <div style={infoCardStyle}>
-                  <CalendarDays size={18} color="#a36d2f" />
+                  <CalendarDays size={18} color={C.accent} />
                   <div>
                     <div style={infoLabelStyle}>Date</div>
                     <div style={infoValueStyle}>
@@ -689,21 +708,21 @@ function EventDetailDrawer({
                   </div>
                 </div>
                 <div style={infoCardStyle}>
-                  <Clock3 size={18} color="#a36d2f" />
+                  <Clock3 size={18} color={C.accent} />
                   <div>
                     <div style={infoLabelStyle}>Time</div>
                     <div style={infoValueStyle}>{formatTimeRange(event)}</div>
                   </div>
                 </div>
                 <div style={infoCardStyle}>
-                  <MapPin size={18} color="#a36d2f" />
+                  <MapPin size={18} color={C.accent} />
                   <div>
                     <div style={infoLabelStyle}>Location</div>
                     <div style={infoValueStyle}>{locationLabel}</div>
                   </div>
                 </div>
                 <div style={infoCardStyle}>
-                  <Users size={18} color="#a36d2f" />
+                  <Users size={18} color={C.accent} />
                   <div>
                     <div style={infoLabelStyle}>Guests</div>
                     <div style={infoValueStyle}>{formatGuestCount(event)}</div>
@@ -713,15 +732,15 @@ function EventDetailDrawer({
 
               <section style={sectionCardStyle}>
                 <div style={sectionLabelStyle}>Registration</div>
-                <div style={{ color: '#4c4337', lineHeight: 1.65 }}>
+                <div style={{ color: C.textMutedStrong, lineHeight: 1.65 }}>
                   Guests will use this event page to register.
                 </div>
                 <div
                   style={{
                     marginTop: '14px',
                     borderRadius: '18px',
-                    border: '1px solid #efe2d1',
-                    background: '#fff8f0',
+                    border: `1px solid ${C.borderSoft}`,
+                    background: C.surfaceSoft,
                     padding: '14px 16px',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -730,13 +749,13 @@ function EventDetailDrawer({
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, color: '#201b16' }}>
+                    <div style={{ fontWeight: 700, color: C.textStrong }}>
                       General Admission
                     </div>
                     <div
                       style={{
                         marginTop: '4px',
-                        color: '#7c7367',
+                        color: C.textMuted,
                         fontSize: '0.92rem',
                       }}
                     >
@@ -745,7 +764,7 @@ function EventDetailDrawer({
                         : 'Open registration on the event page'}
                     </div>
                   </div>
-                  <div style={{ fontWeight: 800, color: '#a36d2f' }}>
+                  <div style={{ fontWeight: 800, color: C.accent }}>
                     {ticketPriceLabel}
                   </div>
                 </div>
@@ -755,7 +774,7 @@ function EventDetailDrawer({
                 <div style={sectionLabelStyle}>About Event</div>
                 <div
                   style={{
-                    color: '#4c4337',
+                    color: C.textMutedStrong,
                     lineHeight: 1.75,
                     whiteSpace: 'pre-wrap',
                   }}
@@ -769,7 +788,7 @@ function EventDetailDrawer({
                 <div style={sectionLabelStyle}>Location</div>
                 <div
                   style={{
-                    color: '#201b16',
+                    color: C.textStrong,
                     fontWeight: 700,
                     marginBottom: '8px',
                   }}
@@ -795,15 +814,15 @@ function EventDetailDrawer({
                       marginTop: '12px',
                       borderRadius: '18px',
                       padding: '18px',
-                      background: '#fff8f0',
-                      border: '1px solid #efe2d1',
+                      background: C.surfaceSoft,
+                      border: `1px solid ${C.borderSoft}`,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '10px',
-                      color: '#7c7367',
+                      color: C.textMuted,
                     }}
                   >
-                    <Globe size={18} color="#a36d2f" />
+                    <Globe size={18} color={C.accent} />
                     This event will be hosted online.
                   </div>
                 )}
@@ -820,7 +839,7 @@ function EventDetailDrawer({
                     flexWrap: 'wrap',
                   }}
                 >
-                  <div style={{ color: '#4c4337' }}>
+                  <div style={{ color: C.textMutedStrong }}>
                     {attendees.length > 0
                       ? 'Registered guests already showing interest in this event.'
                       : 'Guest profiles will appear here after people RSVP.'}
@@ -829,8 +848,8 @@ function EventDetailDrawer({
                     style={{
                       padding: '8px 12px',
                       borderRadius: '999px',
-                      background: '#f7eee4',
-                      color: '#9c6b35',
+                      background: C.accentSoft,
+                      color: C.accent,
                       fontWeight: 800,
                     }}
                   >
@@ -859,20 +878,22 @@ function EventDetailDrawer({
                             gap: '12px',
                             alignItems: 'center',
                             borderRadius: '16px',
-                            background: '#fff8f0',
-                            border: '1px solid #efe2d1',
+                            background: C.surfaceSoft,
+                            border: `1px solid ${C.borderSoft}`,
                             padding: '12px 14px',
                           }}
                         >
                           <AttendeeAvatar attendee={attendee} index={0} />
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, color: '#201b16' }}>
+                            <div
+                              style={{ fontWeight: 700, color: C.textStrong }}
+                            >
                               {attendee.name}
                             </div>
                             <div
                               style={{
                                 fontSize: '0.9rem',
-                                color: '#7c7367',
+                                color: C.textMuted,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
@@ -910,22 +931,22 @@ function EventDetailDrawer({
                         width: 52,
                         height: 52,
                         borderRadius: '999px',
-                        background: '#f6ddd0',
+                        background: C.accentSoft,
                         display: 'grid',
                         placeItems: 'center',
-                        color: '#b26a29',
+                        color: C.accent,
                       }}
                     >
                       <Users size={22} />
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 800, color: '#201b16' }}>
+                    <div style={{ fontWeight: 800, color: C.textStrong }}>
                       {event.host_name || 'GrowthLab'}
                     </div>
                     <div
                       style={{
-                        color: '#7c7367',
+                        color: C.textMuted,
                         marginTop: '4px',
                         lineHeight: 1.6,
                       }}
@@ -999,7 +1020,7 @@ function EventDetailDrawer({
   );
 }
 
-export default function LumaEventsPageClient() {
+export default function EventsPageClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1018,6 +1039,8 @@ export default function LumaEventsPageClient() {
     []
   );
   const [copyFeedback, setCopyFeedback] = useState('');
+  const [hasAutoOpenedInitialEvent, setHasAutoOpenedInitialEvent] =
+    useState(false);
 
   const selectedSlug = searchParams.get('event') || '';
   const created = searchParams.get('created') === '1';
@@ -1177,6 +1200,46 @@ export default function LumaEventsPageClient() {
         );
   }, [events, filter]);
 
+  useEffect(() => {
+    if (selectedSlug) {
+      setHasAutoOpenedInitialEvent(true);
+      return;
+    }
+
+    if (
+      hasAutoOpenedInitialEvent ||
+      isTablet ||
+      loading ||
+      groupedEvents.length === 0
+    ) {
+      return;
+    }
+
+    const firstVisibleEvent = groupedEvents[0]?.items[0];
+    if (!firstVisibleEvent) {
+      return;
+    }
+
+    setHasAutoOpenedInitialEvent(true);
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set('event', firstVisibleEvent.slug);
+    const nextQuery = nextParams.toString();
+
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+  }, [
+    groupedEvents,
+    hasAutoOpenedInitialEvent,
+    isTablet,
+    loading,
+    pathname,
+    router,
+    searchParams,
+    selectedSlug,
+  ]);
+
   const selectEvent = (slug: string) => {
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set('event', slug);
@@ -1211,9 +1274,9 @@ export default function LumaEventsPageClient() {
     <main
       style={{
         minHeight: '100vh',
-        background:
-          'linear-gradient(180deg, #f8f4ef 0%, #f6f1e8 28%, #f9f7f2 100%)',
-        color: '#201b16',
+        background: `linear-gradient(180deg, ${C.bg} 0%, ${C.bgAlt} 28%, ${C.bgCanvas} 100%)`,
+        color: C.text,
+        fontFamily: lumaListPageFontStack,
       }}
     >
       <header
@@ -1222,8 +1285,8 @@ export default function LumaEventsPageClient() {
           top: 0,
           zIndex: 20,
           backdropFilter: 'blur(10px)',
-          background: 'rgba(248, 244, 239, 0.86)',
-          borderBottom: '1px solid rgba(95, 78, 57, 0.08)',
+          background: C.toolbar,
+          borderBottom: `1px solid ${C.toolbarBorder}`,
         }}
       >
         <div
@@ -1251,10 +1314,10 @@ export default function LumaEventsPageClient() {
                 width: 30,
                 height: 30,
                 borderRadius: '999px',
-                background: 'linear-gradient(135deg, #f2d8bc, #f9ede1)',
+                background: `linear-gradient(135deg, ${C.accentGradientFrom}, ${C.accentGradientTo})`,
                 display: 'grid',
                 placeItems: 'center',
-                color: '#9a6431',
+                color: C.accentMuted,
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8)',
               }}
             >
@@ -1263,7 +1326,7 @@ export default function LumaEventsPageClient() {
             <Link href={routes.luma.events} style={activeNavStyle}>
               Events
             </Link>
-            <Link href={routes.eventCalendar} style={navStyle}>
+            <Link href={routes.calendars} style={navStyle}>
               Calendars
             </Link>
             <Link href={routes.discover} style={navStyle}>
@@ -1299,18 +1362,16 @@ export default function LumaEventsPageClient() {
                 gap: '8px',
                 padding: '8px 12px',
                 borderRadius: '999px',
-                background: '#fff8f0',
-                border: '1px solid #ebdecd',
-                color: '#a36d2f',
+                background: C.surfaceSoft,
+                border: `1px solid ${C.borderWarm}`,
+                color: C.accentMuted,
                 fontWeight: 800,
                 fontSize: '0.78rem',
                 width: 'fit-content',
               }}
             >
               <CheckCircle2 size={14} />
-              {mode === 'personal'
-                ? 'Your Luma timeline'
-                : 'Luma event timeline'}
+              {mode === 'personal' ? 'Your event timeline' : 'Event timeline'}
             </div>
             <div>
               <h1
@@ -1319,6 +1380,7 @@ export default function LumaEventsPageClient() {
                   fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
                   lineHeight: 0.95,
                   letterSpacing: '-0.06em',
+                  color: C.textStrong,
                 }}
               >
                 Events
@@ -1326,15 +1388,15 @@ export default function LumaEventsPageClient() {
               <p
                 style={{
                   margin: '10px 0 0',
-                  color: '#7a746b',
+                  color: C.textMuted,
                   fontSize: '1rem',
                   maxWidth: 620,
                   lineHeight: 1.7,
                 }}
               >
                 Newly created events show up here as a timeline card, and you
-                can open the event details on the right just like the Luma
-                layout in your screenshots.
+                can open the event details on the right using the same event
+                layout from your screenshots.
               </p>
             </div>
           </div>
@@ -1344,8 +1406,8 @@ export default function LumaEventsPageClient() {
               display: 'inline-flex',
               padding: '4px',
               borderRadius: '16px',
-              background: '#fffdfa',
-              border: '1px solid #eadfce',
+              background: C.surface,
+              border: `1px solid ${C.border}`,
               boxShadow: '0 12px 30px rgba(15, 23, 42, 0.05)',
             }}
           >
@@ -1360,8 +1422,8 @@ export default function LumaEventsPageClient() {
                     padding: '10px 16px',
                     borderRadius: '12px',
                     border: 'none',
-                    background: active ? '#1b1712' : 'transparent',
-                    color: active ? '#fff9f2' : '#6b6459',
+                    background: active ? C.strong : 'transparent',
+                    color: active ? C.strongForeground : C.textMutedStrong,
                     fontWeight: 700,
                     cursor: 'pointer',
                     minWidth: 112,
@@ -1380,14 +1442,13 @@ export default function LumaEventsPageClient() {
               marginBottom: '18px',
               padding: '14px 16px',
               borderRadius: '18px',
-              background: '#ffe5ef',
-              border: '1px solid #f7bfd4',
-              color: '#bb2a63',
+              background: C.roseSoft,
+              border: `1px solid ${C.roseSoft}`,
+              color: C.rose,
               fontWeight: 700,
             }}
           >
-            Event created. Open the card to review it in the Luma-style detail
-            panel.
+            Event created. Open the card to review it in the event detail panel.
           </div>
         ) : null}
 
@@ -1397,9 +1458,9 @@ export default function LumaEventsPageClient() {
               marginBottom: '18px',
               padding: '14px 16px',
               borderRadius: '18px',
-              background: '#fff1f4',
-              border: '1px solid #f4c8d4',
-              color: '#b4235d',
+              background: C.dangerSoft,
+              border: `1px solid ${C.roseSoft}`,
+              color: C.danger,
               fontWeight: 700,
             }}
           >
@@ -1413,7 +1474,7 @@ export default function LumaEventsPageClient() {
               minHeight: '45vh',
               display: 'grid',
               placeItems: 'center',
-              color: '#a36d2f',
+              color: C.accentMuted,
             }}
           >
             <Loader2 className="animate-spin" size={40} />
@@ -1449,7 +1510,7 @@ export default function LumaEventsPageClient() {
                   <div
                     style={{
                       marginTop: '6px',
-                      color: '#aca497',
+                      color: C.textTertiary,
                       fontSize: '0.98rem',
                     }}
                   >
@@ -1465,7 +1526,9 @@ export default function LumaEventsPageClient() {
                     display: 'grid',
                     gap: '14px',
                     paddingLeft: isTablet ? 0 : 28,
-                    borderLeft: isTablet ? 'none' : '1px dashed #e4d7c6',
+                    borderLeft: isTablet
+                      ? 'none'
+                      : `1px dashed ${C.borderDashed}`,
                   }}
                 >
                   {group.items.map((event) => {
@@ -1483,14 +1546,12 @@ export default function LumaEventsPageClient() {
                           position: 'relative',
                           textAlign: 'left',
                           border: active
-                            ? '1px solid #dabb95'
-                            : '1px solid #eee4d8',
-                          background: active ? '#fffdf9' : '#ffffff',
+                            ? `1px solid ${C.borderActive}`
+                            : `1px solid ${C.borderCard}`,
+                          background: active ? C.surface : C.surfaceRaised,
                           borderRadius: '26px',
                           padding: isTablet ? '16px' : '18px 18px 18px 20px',
-                          boxShadow: active
-                            ? '0 22px 44px rgba(163,109,47,0.10)'
-                            : '0 16px 36px rgba(15,23,42,0.05)',
+                          boxShadow: active ? C.shadowCardActive : C.shadowCard,
                           display: 'grid',
                           gridTemplateColumns: isTablet
                             ? '1fr'
@@ -1509,8 +1570,8 @@ export default function LumaEventsPageClient() {
                               width: 10,
                               height: 10,
                               borderRadius: '999px',
-                              background: active ? '#d69037' : '#d7ccbe',
-                              boxShadow: '0 0 0 4px #f8f4ef',
+                              background: active ? C.accentStrong : C.border,
+                              boxShadow: `0 0 0 4px ${C.bg}`,
                             }}
                           />
                         ) : null}
@@ -1523,13 +1584,13 @@ export default function LumaEventsPageClient() {
                               alignItems: 'center',
                               gap: '8px',
                               marginBottom: '10px',
-                              color: '#8f8577',
+                              color: C.textSoft,
                               fontWeight: 700,
                             }}
                           >
                             <span>{formatClock(event.time)}</span>
                             {event.end_time ? (
-                              <span style={{ color: '#d69037' }}>
+                              <span style={{ color: C.accentStrong }}>
                                 {formatClock(event.end_time)}
                               </span>
                             ) : null}
@@ -1544,8 +1605,8 @@ export default function LumaEventsPageClient() {
                                 marginBottom: '8px',
                                 padding: '6px 10px',
                                 borderRadius: '999px',
-                                background: '#fff5e7',
-                                color: '#c07d2f',
+                                background: C.accentSoft,
+                                color: C.accent,
                                 fontSize: '0.76rem',
                                 fontWeight: 800,
                               }}
@@ -1558,7 +1619,7 @@ export default function LumaEventsPageClient() {
                                 fontSize: isTablet ? '1.25rem' : '1.4rem',
                                 lineHeight: 1.22,
                                 letterSpacing: '-0.03em',
-                                color: '#201b16',
+                                color: C.text,
                               }}
                             >
                               {event.title}
@@ -1569,11 +1630,11 @@ export default function LumaEventsPageClient() {
                             style={{
                               display: 'grid',
                               gap: '8px',
-                              color: '#7f776e',
+                              color: C.textMuted,
                             }}
                           >
                             <div style={timelineRowStyle}>
-                              <MapPin size={16} color="#b7ab9c" />
+                              <MapPin size={16} color={C.textSubtle} />
                               <span>
                                 {event.is_online
                                   ? 'Online event'
@@ -1582,9 +1643,9 @@ export default function LumaEventsPageClient() {
                             </div>
                             <div style={timelineRowStyle}>
                               {event.relationship === 'hosting' ? (
-                                <Users size={16} color="#b7ab9c" />
+                                <Users size={16} color={C.textSubtle} />
                               ) : (
-                                <Ticket size={16} color="#b7ab9c" />
+                                <Ticket size={16} color={C.textSubtle} />
                               )}
                               <span>{formatGuestCount(event)}</span>
                             </div>
@@ -1609,7 +1670,7 @@ export default function LumaEventsPageClient() {
                             {guestCount > 0 ? (
                               <span
                                 style={{
-                                  color: '#9e9488',
+                                  color: C.textTertiary,
                                   fontSize: '0.92rem',
                                   fontWeight: 700,
                                 }}
@@ -1627,7 +1688,7 @@ export default function LumaEventsPageClient() {
                             borderRadius: '18px',
                             overflow: 'hidden',
                             justifySelf: isTablet ? 'stretch' : 'end',
-                            background: '#17110f',
+                            background: C.strong,
                           }}
                         >
                           <img
@@ -1668,27 +1729,27 @@ export default function LumaEventsPageClient() {
 }
 
 const navStyle: React.CSSProperties = {
-  color: '#8c8478',
+  color: C.textSoft,
   textDecoration: 'none',
   fontWeight: 700,
 };
 
 const activeNavStyle: React.CSSProperties = {
   ...navStyle,
-  color: '#2c241b',
+  color: C.textStrong,
 };
 
 const createButtonStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '10px 14px',
-  borderRadius: '14px',
-  background: '#1b1712',
-  color: '#fff9f2',
+  padding: '12px 18px',
+  borderRadius: '16px',
+  background: C.success,
+  color: C.strongForeground,
   textDecoration: 'none',
   fontWeight: 700,
-  boxShadow: '0 16px 26px rgba(27, 23, 18, 0.16)',
+  boxShadow: C.shadowButton,
 };
 
 const timelineRowStyle: React.CSSProperties = {
@@ -1706,8 +1767,8 @@ const timelineActionStyle: React.CSSProperties = {
   gap: '8px',
   padding: '10px 14px',
   borderRadius: '12px',
-  background: '#f6f0e7',
-  color: '#635849',
+  background: C.accentSoft,
+  color: C.accent,
   fontWeight: 700,
 };
 
@@ -1715,9 +1776,9 @@ const headerIconButtonStyle: React.CSSProperties = {
   width: 36,
   height: 36,
   borderRadius: '12px',
-  border: '1px solid #eadfce',
-  background: '#ffffff',
-  color: '#53483b',
+  border: `1px solid ${C.border}`,
+  background: C.surfaceRaised,
+  color: C.textMutedStrong,
   display: 'grid',
   placeItems: 'center',
   cursor: 'pointer',
@@ -1729,9 +1790,9 @@ const headerButtonStyle: React.CSSProperties = {
   justifyContent: 'center',
   gap: '8px',
   borderRadius: '12px',
-  border: '1px solid #eadfce',
-  background: '#ffffff',
-  color: '#5f5446',
+  border: `1px solid ${C.border}`,
+  background: C.surfaceRaised,
+  color: C.textMutedStrong,
   padding: '10px 12px',
   fontWeight: 700,
   textDecoration: 'none',
@@ -1743,8 +1804,8 @@ const manageBannerButtonStyle: React.CSSProperties = {
   gap: '8px',
   borderRadius: '999px',
   padding: '8px 12px',
-  background: '#f82581',
-  color: '#fff',
+  background: C.rose,
+  color: C.surfaceRaised,
   textDecoration: 'none',
   whiteSpace: 'nowrap',
 };
@@ -1752,8 +1813,8 @@ const manageBannerButtonStyle: React.CSSProperties = {
 const detailTagStyle: React.CSSProperties = {
   padding: '7px 10px',
   borderRadius: '999px',
-  background: '#fff4e7',
-  color: '#c97f2d',
+  background: C.accentSoft,
+  color: C.accent,
   fontWeight: 800,
   fontSize: '0.76rem',
 };
@@ -1764,8 +1825,8 @@ const infoCardStyle: React.CSSProperties = {
   alignItems: 'flex-start',
   padding: '14px 16px',
   borderRadius: '18px',
-  background: '#fff8f0',
-  border: '1px solid #efe2d1',
+  background: C.surfaceSoft,
+  border: `1px solid ${C.borderSoft}`,
 };
 
 const infoLabelStyle: React.CSSProperties = {
@@ -1773,20 +1834,20 @@ const infoLabelStyle: React.CSSProperties = {
   fontWeight: 800,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  color: '#ad8b61',
+  color: C.accentMuted,
 };
 
 const infoValueStyle: React.CSSProperties = {
   marginTop: '5px',
   fontWeight: 700,
-  color: '#201b16',
+  color: C.text,
   lineHeight: 1.55,
 };
 
 const sectionCardStyle: React.CSSProperties = {
   borderRadius: '22px',
-  border: '1px solid #efe2d1',
-  background: '#fffdfa',
+  border: `1px solid ${C.borderSoft}`,
+  background: C.surface,
   padding: '18px',
 };
 
@@ -1795,7 +1856,7 @@ const sectionLabelStyle: React.CSSProperties = {
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   fontWeight: 800,
-  color: '#ad8b61',
+  color: C.accentMuted,
   marginBottom: '14px',
 };
 
@@ -1806,8 +1867,8 @@ const primaryActionStyle: React.CSSProperties = {
   gap: '8px',
   borderRadius: '16px',
   padding: '13px 16px',
-  background: '#1b1712',
-  color: '#fff9f2',
+  background: C.strong,
+  color: C.strongForeground,
   textDecoration: 'none',
   fontWeight: 800,
 };
@@ -1819,17 +1880,17 @@ const secondaryActionStyle: React.CSSProperties = {
   gap: '8px',
   borderRadius: '16px',
   padding: '13px 16px',
-  background: '#fff8f0',
-  color: '#6a5f50',
-  border: '1px solid #efe2d1',
+  background: C.surfaceSoft,
+  color: C.textMutedStrong,
+  border: `1px solid ${C.borderSoft}`,
   textDecoration: 'none',
   fontWeight: 800,
 };
 
 const miniStatStyle: React.CSSProperties = {
   borderRadius: '18px',
-  border: '1px solid #efe2d1',
-  background: '#fff8f0',
+  border: `1px solid ${C.borderSoft}`,
+  background: C.surfaceSoft,
   padding: '14px 16px',
 };
 
@@ -1838,12 +1899,12 @@ const miniStatLabelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
   fontWeight: 800,
-  color: '#ad8b61',
+  color: C.accentMuted,
 };
 
 const miniStatValueStyle: React.CSSProperties = {
   marginTop: '8px',
   fontSize: '1.15rem',
   fontWeight: 800,
-  color: '#201b16',
+  color: C.text,
 };

@@ -1,6 +1,9 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import { decodeNextAuthJwt, getNextAuthSecret } from '@/utils/nextauth-secret';
+import { ensureNextAuthUrl } from '@/utils/nextauth-url';
+
+ensureNextAuthUrl();
 
 export default withAuth(
   function middleware(req) {

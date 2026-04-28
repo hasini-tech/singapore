@@ -22,7 +22,6 @@ import {
   PiCaretDown,
   PiGlobe,
   PiShuffle,
-  PiMapPin,
   PiFileText,
   PiTicket,
   PiShieldCheck,
@@ -41,6 +40,7 @@ import { DEFAULT_EVENT_COVER } from '@/lib/defaults';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useMedia } from '@/hooks/use-media';
+import CreateEventLocationField from '@/components/events/CreateEventLocationField';
 
 // ─── Theme system ─────────────────────────────────────────────────────────────
 type ThemeId =
@@ -2038,7 +2038,7 @@ export default function CreateEventBuilderPage() {
           >
             <img
               className="evently-image"
-              src={uploadedImage || '/growthlab/startup-team-collaboration.png'}
+              src={uploadedImage || '/startup-team-collaboration.png'}
               alt="Cover"
               style={{
                 width: '100%',
@@ -2486,27 +2486,13 @@ export default function CreateEventBuilderPage() {
           </div>
 
           {/* Location */}
-          <div className="luma-input-row">
-            <PiMapPin size={18} color={C.muted} style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <input
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  width: '100%',
-                  display: 'block',
-                }}
-                placeholder="Add Event Location"
-                value={form.location}
-                onChange={(e) => setField('location', e.target.value)}
-              />
-              {!form.location && (
-                <div style={{ fontSize: 12, color: C.light, marginTop: 2 }}>
-                  Offline location or virtual link
-                </div>
-              )}
-            </div>
-          </div>
+          <CreateEventLocationField
+            value={form.location}
+            isOnline={form.is_online}
+            onChange={(value) => setField('location', value)}
+            onOnlineChange={(value) => setField('is_online', value)}
+            colors={C}
+          />
 
           {/* Description */}
           <div className="luma-input-row">
